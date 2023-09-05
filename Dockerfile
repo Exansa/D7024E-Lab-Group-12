@@ -1,4 +1,12 @@
-FROM alpine:latest
+FROM golang:latest
+RUN mkdir /app
+WORKDIR /app
+
+COPY . .
+RUN yarn install --production
+CMD ["node", "src/index.js"]
+
+EXPOSE 3000
 
 # Add the commands needed to put your compiled go binary in the container and
 # run it when the container starts.
