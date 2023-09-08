@@ -11,7 +11,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		fmt.Printf("Enter a string: ")
+		fmt.Printf("> ")
 
 		input, err := reader.ReadString('\n')
 		if err != nil {
@@ -21,30 +21,29 @@ func main() {
 
 		trimedInput := strings.TrimSpace(input)
 		fieldedInput := strings.Fields(trimedInput)
-		switch fieldedInput[0] {
-		case "put":
-			if len(fieldedInput) == 2 {
-				put(fieldedInput)
-			} else {
-				fmt.Printf("Wrong arguments! correct command is: put [file] \n")
+		if len(fieldedInput) > 0 {
+			switch fieldedInput[0] {
+			case "put":
+				execute(fieldedInput, put, 2, "put [file]")
+			case "get":
+				execute(fieldedInput, get, 2, "get [file]")
+			case "exit":
+				execute(fieldedInput, exit, 1, "exit")
+			case "help":
+				fmt.Printf("here are the different commands")
+			default:
+				fmt.Printf("Invalid command.\n")
 			}
-		case "get":
-			if len(fieldedInput) == 2 {
-				put(fieldedInput)
-			} else {
-				fmt.Printf("Wrong arguments! correct command is: get [hash] \n")
-			}
-
-		case "exit":
-			if len(fieldedInput) == 1 {
-				exit(fieldedInput)
-			} else {
-				fmt.Printf("Wrong arguments! correct command is: exit \n")
-			}
-		case "help":
-			fmt.Printf("here are the different commands")
 		}
 
+	}
+}
+
+func execute(inp []string, exec func([]string), inpLen int, corrStr string) {
+	if len(inp) == inpLen {
+		exec(inp)
+	} else {
+		fmt.Printf("Invalid argument\nCorrect format: %s\n\n", corrStr)
 	}
 }
 
