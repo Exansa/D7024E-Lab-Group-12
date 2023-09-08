@@ -25,8 +25,8 @@ func main() {
 			switch fieldedInput[0] {
 			case "put":
 				execute(fieldedInput, put, 2, "put [file]")
-			case "get":
-				execute(fieldedInput, get, 2, "get [file]")
+			case "get": //need to check if it is a valid sha160
+				execute(fieldedInput, get, 2, "get [file hash]")
 			case "exit":
 				execute(fieldedInput, exit, 1, "exit")
 			case "help":
@@ -49,7 +49,8 @@ func execute(inp []string, exec func([]string), inpLen int, corrStr string) {
 
 func put(input []string) {
 	fmt.Printf("Your file was uploaded succesfully! \n")
-	//store value here
+	//get hash for file
+	//call store from kademlia
 	//return hash here
 }
 
@@ -61,5 +62,5 @@ func get(input []string) {
 
 func exit(input []string) {
 	fmt.Printf("Bye, bye little node! \n")
-	//exit node here
+	//exit node here os.exit(0)
 }
