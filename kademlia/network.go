@@ -19,6 +19,7 @@ func (network *Network) SendFindDataMessage(hash string) {
 	// TODO
 }
 
-func (network *Network) SendStoreMessage(data []byte) {
-	// TODO
+func (network *Network) SendStoreMessage(data []byte) []byte {
+	hash := hashData(data)
+	return hash
 }

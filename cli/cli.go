@@ -49,8 +49,8 @@ func execute(inp []string, exec func([]string), inpLen int, corrStr string) {
 
 func put(input []string) {
 	fmt.Printf("Your file was uploaded succesfully! \n")
-	//get hash for file
 	//call store from kademlia
+	//get hash for file
 	//return hash here
 }
 
