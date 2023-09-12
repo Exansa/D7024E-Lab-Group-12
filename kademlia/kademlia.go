@@ -1,12 +1,12 @@
 package d7024e
 
 type Kademlia struct {
-	//id
-	//ip
-	//port
-	//data storage
-	//bootstrap eller inte
-	//routingtable
+	ID           int               //id
+	IP           string            //ip
+	PORT         int               //port
+	DataStore    map[string][]byte //data storage
+	Bootstrap    bool              //bootstrap eller inte
+	RoutingTable *RoutingTable     //routingtable
 	//bucket?
 }
 
