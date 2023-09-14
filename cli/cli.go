@@ -26,7 +26,7 @@ func main() {
 			case "put":
 				execute(fieldedInput, put, 2, "put [file]")
 			case "get":
-				execute(fieldedInput, get, 2, "get [file]")
+				execute(fieldedInput, get, 2, "get [hash]")
 			case "exit":
 				execute(fieldedInput, exit, 1, "exit")
 			case "help":
