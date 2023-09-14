@@ -53,7 +53,7 @@ func put(input []string, network *Network) {
 	if err != nil {
 		fmt.Printf("your file was not uploaded succesfully", err)
 	} else {
-		fmt.Printf("Your file was uploaded succesfully! The id is: \n" + hash + "\n")
+		fmt.Printf("Your file was uploaded succesfully! The id is: \n%s\n", hash)
 	}
 
 }
