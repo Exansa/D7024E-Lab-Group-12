@@ -19,10 +19,12 @@ func main() {
 			return
 		}
 
-		trimedInput := strings.TrimSpace(input)
-		fieldedInput := strings.Fields(trimedInput)
+		trimmedInput := strings.TrimSpace(input)
+		fieldedInput := strings.Fields(trimmedInput)
 		if len(fieldedInput) > 0 {
 			switch fieldedInput[0] {
+			case "ping":
+				execute(fieldedInput, ping, 1, "ping [node address]")
 			case "put":
 				execute(fieldedInput, put, 2, "put [file]")
 			case "get":
@@ -47,13 +49,20 @@ func execute(inp []string, exec func([]string), inpLen int, corrStr string) {
 	}
 }
 
-func put(input []string, network *Network) {
-	fmt.Printf("Your file was uploaded succesfully! \n")
-	hash, err := network.SendStoreMessage(input)
+func ping(input []string, network *Network) {
+	err := network.SendPingMessage(input[1])
 	if err != nil {
-		fmt.Printf("your file was not uploaded succesfully", err)
+		fmt.Printf("The ping was not successful. \n", err)
+	}
+}
+
+func put(input []string, network *Network) {
+	fmt.Printf("Your file was uploaded successfully! \n")
+	hash, err := network.SendStoreMessage(input[1])
+	if err != nil {
+		fmt.Printf("your file was not uploaded successfully", err)
 	} else {
-		fmt.Printf("Your file was uploaded succesfully! The id is: \n%s\n", hash)
+		fmt.Printf("Your file was uploaded successfully! The id is: \n%s\n", hash)
 	}
 
 }

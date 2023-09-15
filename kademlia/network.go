@@ -10,9 +10,10 @@ type Network struct {
 }
 
 type RPC struct {
-	sender  Contact
-	msgType string
-	data    msgData
+	sender   Contact
+	receiver Contact
+	msgType  string
+	data     msgData
 }
 
 type msgData struct {
@@ -22,8 +23,26 @@ type msgData struct {
 	VALUE string
 }
 
-func Listen(ip string, port int) Network {
+func Listen(ip string, port int) {
 	// TODO
+	listen, err := net.Listen("udp", ip+":"+port)
+	if err != nil {
+		fmt.Println("Error listening:", err.Error())
+		return err
+	}
+	// Close the listener when the application closes.
+	defer listen.Close()
+	fmt.Println("Listening on %s:%v", ip, port)
+	for {
+		// Listen for an incoming connection.
+		conn, err := listen.Accept()
+		if err != nil {
+			fmt.Println("Error accepting: ", err.Error())
+			return err
+		}
+		// Handle connections in a new goroutine.
+		go handleRequest(conn)
+	}
 }
 
 func sendMessage(msg *RPC) {
@@ -50,6 +69,15 @@ func (network *Network) SendPingMessage(contact *Contact) {
 	newMsg.sender = network.Kademlia.RoutingTable.me
 	newMsg.receiver = *contact
 	newMsg.data.PING = "Ping!"
+	sendMessage(newMsg)
+}
+
+func (network *Network) SendPongMessage(contact *Contact) {
+	newMsg := new(RPC)
+	newMsg.msgType = "PING"
+	newMsg.sender = network.Kademlia.RoutingTable.me
+	newMsg.receiver = *contact
+	newMsg.data.PING = "Pong!"
 	sendMessage(newMsg)
 }
 
