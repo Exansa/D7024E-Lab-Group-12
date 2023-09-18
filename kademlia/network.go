@@ -1,12 +1,13 @@
 package d7024e
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 )
 
 type Network struct {
-	node Kademlia
+	Kademlia Kademlia
 }
 
 type RPC struct {
@@ -23,12 +24,12 @@ type msgData struct {
 	VALUE string
 }
 
-func Listen(ip string, port int) {
+func (network *Network) Listen(ip string, port int) {
 	// TODO
-	listen, err := net.Listen("udp", ip+":"+port)
+	listen, err := net.Listen("udp", ip+":"+port) //kolla på att använda net.addr
 	if err != nil {
 		fmt.Println("Error listening:", err.Error())
-		return err
+		return
 	}
 	// Close the listener when the application closes.
 	defer listen.Close()
@@ -38,23 +39,58 @@ func Listen(ip string, port int) {
 		conn, err := listen.Accept()
 		if err != nil {
 			fmt.Println("Error accepting: ", err.Error())
-			return err
+			return
 		}
 		// Handle connections in a new goroutine.
 		go handleRequest(conn)
 	}
 }
 
-func sendMessage(msg *RPC) {
-	//possible encoding
-	conn, err := net.Dial("udp")
+func handleRequest(conn net.Conn) {
+	// read incoming message and decode it
+	packet := make([]byte, 1024)
+	_, err := conn.Read(packet)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		conn.Close()
+		return
+	}
+	var msg RPC
+	err = json.Unmarshal(packet, &msg)
+	// check for errors
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		conn.Close()
+		return
+	}
+	// switch case for different message types
+	switch msg.msgType {
+	case "PING":
+		// send pong
+	case "STORE":
+		// store data
+	case "FIND_NODE":
+		// send closest nodes
+	case "FIND_VALUE":
+		// send value
+	}
+	// send response
+	// check for errors
+	// close connection
+	conn.Close()
 
+}
+
+func sendMessage(msg *RPC) {
+
+	conn, err := net.Dial("udp", msg.receiver.Address)
+	encodedMsg, err := json.Marshal(msg)
 	if err != nil {
 		fmt.Printf("Error: %s", err)
 		return
 	}
 	//send msg
-	//
+	conn.Write(encodedMsg)
 	//check for errors between all
 	err = conn.Close()
 	if err != nil {
