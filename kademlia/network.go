@@ -94,6 +94,10 @@ func (network *Network) Listen(address string) {
 func sendMessage(msg *RPC) {
 
 	conn, err := net.Dial("udp", msg.Receiver.Address)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		return
+	}
 	encodedMsg, err := json.Marshal(msg)
 	if err != nil {
 		fmt.Printf("Error: %s", err)
