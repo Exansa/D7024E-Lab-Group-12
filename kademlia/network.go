@@ -13,16 +13,25 @@ type Network struct {
 type RPC struct {
 	Sender   Contact `json:"sender"`   // sender Contact
 	Receiver Contact `json:"receiver"` // receiver Contact
-	MsgType  string  `json:"msgType"`  // message type
+	Type     msgType `json:"msgType"`  // message type
 	Data     msgData `json:"data"`     // message data
 }
 
 type msgData struct {
 	PING  string
 	STORE []byte
-	NODE  KademliaID
+	NODE  Contact
 	VALUE string
 }
+
+type msgType string
+
+const (
+	PING       msgType = "PING"
+	STORE      msgType = "STORE"
+	FIND_NODE  msgType = "FIND_NODE"
+	FIND_VALUE msgType = "FIND_VALUE"
+)
 
 func (network *Network) handleRequest(conn net.Conn) {
 	// read incoming message and decode it
@@ -42,8 +51,8 @@ func (network *Network) handleRequest(conn net.Conn) {
 		return
 	}
 	// switch case for different message types
-	switch msg.MsgType {
-	case "PING":
+	switch msg.Type {
+	case PING:
 		// send pong
 		if msg.Data.PING == "Ping!" {
 			network.SendPongMessage(&msg.Sender)
@@ -51,13 +60,14 @@ func (network *Network) handleRequest(conn net.Conn) {
 			// add sender to kademlia routing table
 			network.Kademlia.RoutingTable.AddContact(msg.Sender)
 		}
-	case "STORE":
+	case STORE:
 		// store data using kademlia func store
 		network.Kademlia.Store(msg.Data.STORE)
-	case "FIND_NODE":
+	case FIND_NODE:
 		// send closest nodes
-	case "FIND_VALUE":
+	case FIND_VALUE:
 		// based on hash, find data using kademlia func lookupdata
+		network.Kademlia.LookupData(msg.Data.VALUE)
 
 	default:
 		fmt.Println("Message type not found")
@@ -115,7 +125,7 @@ func sendMessage(msg *RPC) {
 
 func (network *Network) SendPingMessage(contact *Contact) {
 	newMsg := new(RPC)
-	newMsg.MsgType = "PING"
+	newMsg.Type = PING
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *contact
 	newMsg.Data.PING = "Ping!"
@@ -124,7 +134,7 @@ func (network *Network) SendPingMessage(contact *Contact) {
 
 func (network *Network) SendPongMessage(contact *Contact) {
 	newMsg := new(RPC)
-	newMsg.MsgType = "PING"
+	newMsg.Type = PING
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *contact
 	newMsg.Data.PING = "Pong!"
@@ -133,7 +143,7 @@ func (network *Network) SendPongMessage(contact *Contact) {
 
 func (network *Network) SendFindContactMessage(contact *Contact) {
 	newMsg := new(RPC)
-	newMsg.MsgType = "STORE"
+	newMsg.Type = FIND_NODE
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *contact
 	//newMsg.data.NODE = data
@@ -141,7 +151,7 @@ func (network *Network) SendFindContactMessage(contact *Contact) {
 
 func (network *Network) SendFindDataMessage(hash string) {
 	newMsg := new(RPC)
-	newMsg.MsgType = "STORE"
+	newMsg.Type = FIND_NODE
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Data.VALUE = hash
 }
@@ -149,7 +159,7 @@ func (network *Network) SendFindDataMessage(hash string) {
 func (network *Network) SendStoreMessage(contact *Contact, data []byte) []byte {
 	hash := hashData(data)
 	newMsg := new(RPC)
-	newMsg.MsgType = "STORE"
+	newMsg.Type = STORE
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *contact
 	newMsg.Data.STORE = data
