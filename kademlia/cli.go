@@ -1,4 +1,4 @@
-package main
+package d7024e
 
 import (
 	"bufio"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func main() {
+func CLI(kademlia *Kademlia) {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -24,13 +24,13 @@ func main() {
 		if len(fieldedInput) > 0 {
 			switch fieldedInput[0] {
 			case "ping":
-				execute(fieldedInput, ping, 1, "ping [node address]")
+				execute(fieldedInput, ping, 1, "ping [node address]", kademlia)
 			case "put":
-				execute(fieldedInput, put, 2, "put [file]")
+				execute(fieldedInput, put, 2, "put [file]", kademlia)
 			case "get":
-				execute(fieldedInput, get, 2, "get [hash]")
+				execute(fieldedInput, get, 2, "get [hash]", kademlia)
 			case "exit":
-				execute(fieldedInput, exit, 1, "exit")
+				execute(fieldedInput, exit, 1, "exit", kademlia)
 			case "help":
 				fmt.Printf("here are the different commands")
 			default:
@@ -41,24 +41,24 @@ func main() {
 	}
 }
 
-func execute(inp []string, exec func([]string), inpLen int, corrStr string) {
+func execute(inp []string, exec func([]string, *Kademlia), inpLen int, corrStr string, kademlia *Kademlia) {
 	if len(inp) == inpLen {
-		exec(inp)
+		exec(inp, kademlia)
 	} else {
 		fmt.Printf("Invalid argument\nCorrect format: %s\n\n", corrStr)
 	}
 }
 
-func ping(input []string, network *Network) {
-	err := network.SendPingMessage(input[1])
+func ping(input []string, kademlia *Kademlia) {
+	kademlia.Network.SendPingMessage(input[1])
 	if err != nil {
 		fmt.Printf("The ping was not successful. \n", err)
 	}
 }
 
-func put(input []string, network *Network) {
+func put(input []string, kademlia *Kademlia) {
 	fmt.Printf("Your file was uploaded successfully! \n")
-	hash, err := network.SendStoreMessage(input[1])
+	kademlia.Network.SendStoreMessage(input[1])
 	if err != nil {
 		fmt.Printf("your file was not uploaded successfully", err)
 	} else {
@@ -67,13 +67,13 @@ func put(input []string, network *Network) {
 
 }
 
-func get(input []string) {
+func get(input []string, kademlia *Kademlia) {
 	fmt.Printf("Your file was fetched succesfully! \n")
 	//get file from hash here
 	//return file to user here
 }
 
-func exit(input []string) {
+func exit(input []string, kademlia *Kademlia) {
 	fmt.Printf("Bye, bye little node! \n")
 	//exit node here os.exit(0)
 }
