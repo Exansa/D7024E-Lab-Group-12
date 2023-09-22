@@ -50,7 +50,9 @@ func execute(inp []string, exec func([]string, *Kademlia), inpLen int, corrStr s
 }
 
 func ping(input []string, kademlia *Kademlia) {
-	kademlia.Network.SendPingMessage(input[1])
+	newID := NewRandomKademliaID()
+	contactInfo := NewContact(newID, input[1])
+	err := kademlia.Network.SendPingMessage(&contactInfo)
 	if err != nil {
 		fmt.Printf("The ping was not successful. \n", err)
 	}
@@ -58,11 +60,11 @@ func ping(input []string, kademlia *Kademlia) {
 
 func put(input []string, kademlia *Kademlia) {
 	fmt.Printf("Your file was uploaded successfully! \n")
-	kademlia.Network.SendStoreMessage(input[1])
+	err := kademlia.Network.SendStoreMessage([]byte(input[1]))
 	if err != nil {
 		fmt.Printf("your file was not uploaded successfully", err)
 	} else {
-		fmt.Printf("Your file was uploaded successfully! The id is: \n%s\n", hash)
+		fmt.Printf("Your file was uploaded successfully! The id is: \n%s\n", input[1])
 	}
 
 }

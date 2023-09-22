@@ -64,6 +64,7 @@ func (network *Network) handleRequest(conn net.Conn) {
 	case STORE:
 		// store data using kademlia func store
 		network.Kademlia.StoreValue(msg.Data.STORE, msg.Data.HASH)
+
 	case FIND_NODE:
 		// send closest nodes
 	case FIND_VALUE:
@@ -102,17 +103,17 @@ func (network *Network) Listen(address string) {
 	}
 }
 
-func sendMessage(msg *RPC) {
+func sendMessage(msg *RPC) error {
 
 	conn, err := net.Dial("udp", msg.Receiver.Address)
 	if err != nil {
 		fmt.Printf("Error: %s", err)
-		return
+		return err
 	}
 	encodedMsg, err := json.Marshal(msg)
 	if err != nil {
 		fmt.Printf("Error: %s", err)
-		return
+		return err
 	}
 	//send msg
 	conn.Write(encodedMsg)
@@ -120,49 +121,80 @@ func sendMessage(msg *RPC) {
 	err = conn.Close()
 	if err != nil {
 		fmt.Printf("Error: %s", err)
-		return
+		return err
 	}
+	return nil
 }
 
-func (network *Network) SendPingMessage(contact *Contact) {
+func (network *Network) SendPingMessage(contact *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = PING
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *contact
 	newMsg.Data.PING = "Ping!"
-	sendMessage(newMsg)
+	err := sendMessage(newMsg)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		return err
+	}
+	return nil
 }
 
-func (network *Network) SendPongMessage(contact *Contact) {
+func (network *Network) SendPongMessage(contact *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = PING
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *contact
 	newMsg.Data.PING = "Pong!"
-	sendMessage(newMsg)
+	err := sendMessage(newMsg)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		return err
+	}
+	return nil
 }
 
-func (network *Network) SendFindContactMessage(target *Contact, receiver *Contact) (ContactCandidates, error) {
+func (network *Network) SendFindContactMessage(target *Contact, receiver *Contact) (ContactCandidates, error) { //trasig
 	newMsg := new(RPC)
 	newMsg.Type = FIND_NODE
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *receiver
 	newMsg.Data.NODE = *target
+	err := sendMessage(newMsg)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		return ContactCandidates{}, err
+	}
+	return ContactCandidates{}, nil
 }
 
-func (network *Network) SendFindDataMessage(hash string) {
+func (network *Network) SendFindDataMessage(hash string) error {
 	newMsg := new(RPC)
 	newMsg.Type = FIND_NODE
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Data.VALUE = hash
+	err := sendMessage(newMsg)
+	if err != nil {
+		fmt.Printf("Error: %s", err)
+		return err
+	}
+	return nil
 }
 
-func (network *Network) SendStoreMessage(contact Contact, data []byte, dataHash string) {
+func (network *Network) SendStoreMessage(data []byte) error {
 	newMsg := new(RPC)
 	newMsg.Type = STORE
 	newMsg.Sender = network.Kademlia.RoutingTable.me
-	newMsg.Receiver = contact
 	newMsg.Data.STORE = data
-	newMsg.Data.HASH = dataHash
-	sendMessage(newMsg)
+	self, receiver, dataHash := network.Kademlia.Store(newMsg.Data.STORE)
+	if !self {
+		newMsg.Receiver = receiver
+		newMsg.Data.HASH = dataHash
+		err := sendMessage(newMsg)
+		if err != nil {
+			fmt.Printf("Error: %s", err)
+			return err
+		}
+	}
+	return nil
 }

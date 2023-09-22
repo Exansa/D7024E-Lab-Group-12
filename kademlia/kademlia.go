@@ -103,14 +103,14 @@ func (kademlia *Kademlia) LookupData(hash string) {
 	// similar to lookupcontact
 }
 
-func (kademlia *Kademlia) Store(data []byte) {
+func (kademlia *Kademlia) Store(data []byte) (self bool, closest Contact, dataHash string) {
 	// get hash of data
-	dataHash := hex.EncodeToString(sha1.New().Sum(data))
+	dataHash = hex.EncodeToString(sha1.New().Sum(data))
 	dataKey := NewKademliaID(dataHash)
 
 	// find closest nodes, Maybe use lookupcontact?
 	contacts := kademlia.RoutingTable.FindClosestContacts(dataKey, 3)
-	closest := kademlia.RoutingTable.me
+	closest = kademlia.RoutingTable.me
 	// send store message to closest nodes
 	for _, contact := range contacts {
 		if contact.ID.CalcDistance(contact.ID).Less(closest.ID.CalcDistance(contact.ID)) {
@@ -119,8 +119,9 @@ func (kademlia *Kademlia) Store(data []byte) {
 	}
 	if closest.ID.Equals(kademlia.RoutingTable.me.ID) {
 		kademlia.StoreValue(data, dataHash)
+		return true, closest, dataHash
 	} else {
-		kademlia.Network.SendStoreMessage(closest, data, dataHash)
+		return false, closest, dataHash
 	}
 	//kademlia.Network.SendStoreMessage(data, closest)
 	// store data in datastore
