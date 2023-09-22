@@ -104,8 +104,10 @@ func contains[T comparable](s []T, e T) bool {
 	return false
 }
 
-func (kademlia *Kademlia) LookupData(hash string) {
+func (kademlia *Kademlia) LookupData(hash string) (data string) {
 	// similar to lookupcontact
+
+	return data
 }
 
 func (kademlia *Kademlia) Store(data []byte) (self bool, closest Contact, dataHash string) {
