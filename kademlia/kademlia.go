@@ -26,10 +26,10 @@ func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
 	closest := shortlist.contacts[0]
 	probed := make(map[string]bool)
 	probed[closest.ID.String()] = true
-	queue := make(chan ContactCandidates, k)
 
 	for {
 		lastClosest := closest
+		queue := make(chan ContactCandidates, k)
 
 		for _, contact := range shortlist.contacts {
 			// Skip if already probed to prevent dupes
