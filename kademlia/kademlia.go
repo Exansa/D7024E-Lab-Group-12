@@ -88,8 +88,13 @@ func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
 
 func (kademlia *Kademlia) LookupData(hash string) (data string) {
 	// similar to lookupcontact
+	encodedData := kademlia.GetData(hash)
+	//store the value in the closest node that isn't the correct node
+	return string(encodedData)
+}
 
-	return data
+func (kademlia *Kademlia) GetData(hash string) (data []byte) {
+	return kademlia.DataStore[hash]
 }
 
 func (kademlia *Kademlia) Store(data []byte) (self bool, closest Contact, dataHash string) {
