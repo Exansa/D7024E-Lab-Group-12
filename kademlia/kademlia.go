@@ -3,6 +3,7 @@ package d7024e
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
 )
 
 type Kademlia struct {
@@ -68,7 +69,8 @@ func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
 			//TODO: async FIND_NODE RPC to the closest nodes in shortlist
 			res, err := kademlia.Network.SendFindContactMessage(target, &contact)
 			if err != nil {
-				//TODO: handle error
+				fmt.Println("Error listening:", err.Error())
+				return Contact{}
 			}
 			res.Sort()
 			closest = shortlist[0]
