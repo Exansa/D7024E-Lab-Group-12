@@ -54,37 +54,40 @@ func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
 
 	shortlist := kademlia.RoutingTable.FindClosestContacts(target.ID, 3)
 	closest := shortlist[0]
-	probed := []Contact{}
+	probed := make(map[string]bool)
+	probed[closest.ID.String()] = true
 
 	for {
 		lastClosest := closest
 
 		for _, contact := range shortlist {
-			if contains(probed, contact) {
+			if _, ok := probed[contact.ID.String()]; ok {
 				continue
 			}
-
-			probed = append(probed, contact)
+			probed[contact.ID.String()] = true
 
 			//TODO: async FIND_NODE RPC to the closest nodes in shortlist
 			res, err := kademlia.Network.SendFindContactMessage(target, &contact)
 			if err != nil {
 				fmt.Println("Error listening:", err.Error())
-				return Contact{}
+				continue
 			}
-			res.Sort()
-			closest = shortlist[0]
+			// res.Sort()
+			// closest = shortlist[0]
 
-			//addToShortList(res, shortlist)
-
-			//shortlist = append(shortlist, res)
-			//shortlist.sort()
-
-			//shortlist = shortlist[:k]
-
+			shortlist = append(shortlist, res.contacts...)
 		}
 
-		if closest == lastClosest { // Add failbreak
+		// Sort and remove duplicates in shortlist and cut at k
+		// shortlist = kademlia.RoutingTable.SortClosestContacts(shortlist, target.ID)
+		// shortlist = kademlia.RoutingTable.RemoveDuplicates(shortlist)
+		// if len(shortlist) > kademlia.k {
+		// 	shortlist = shortlist[:kademlia.k]
+		// }
+
+		// Exit the loop if no closer nodes are found
+		closest = shortlist[0]
+		if closest.ID.Equals(lastClosest.ID) {
 			break
 		}
 	}
