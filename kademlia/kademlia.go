@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
+	"sync"
 )
 
 const alpha = 3
@@ -26,6 +27,7 @@ func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
 	closest := shortlist.contacts[0]
 	probed := make(map[string]bool)
 	probed[closest.ID.String()] = true
+	wg := sync.WaitGroup{}
 
 	for {
 		lastClosest := closest
@@ -38,21 +40,27 @@ func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
 			}
 			probed[contact.ID.String()] = true
 
+			wg.Add(1)
+
 			//async FIND_NODE RPC to the closest nodes in shortlist
 			go func(contact *Contact) {
+
 				res, err := kademlia.Network.SendFindContactMessage(target, contact)
 
 				if err != nil {
 					fmt.Println("Error listening:", err.Error())
+					wg.Done()
 					return // If it fails to reply, it won't be added to the shortlist
 				}
 
 				queue <- res
+				wg.Done()
 
 			}(&contact)
 
 		}
 
+		wg.Wait()
 		// Wait for all responses
 		close(queue)
 		for t := range queue {
