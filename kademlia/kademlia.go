@@ -6,6 +6,9 @@ import (
 	"fmt"
 )
 
+const alpha = 3
+const k = 20
+
 type Kademlia struct {
 	ID           int               //id
 	IP           string            //ip
@@ -16,92 +19,63 @@ type Kademlia struct {
 	Network      *Network          //network
 }
 
-/*
-Backup
-
-	func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
-		contacts := kademlia.RoutingTable.FindClosestContacts(target.ID, 3)
-		if len(contacts) < 1 {
-			return Contact{}
-		}
-		closest := contacts[0]
-		for _, contact := range contacts {
-			if closest.ID.Equals(target.ID) {
-				return closest
-			} else if contact.ID.CalcDistance(target.ID).Less(closest.ID.CalcDistance(target.ID)) {
-				closest = contact
-			}
-		}
-		return closest
-	}
-*/
 func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
 
-	// for _, contact := range shortlist {
-	// 	// Contact remote node and add the returned closest nodes to closestNodes
-	// 	// You need to implement the logic for contacting remote nodes and getting their closest nodes
-	// 	// You can use the kademlia.RoutingTable to find the closest nodes to a target
-
-	// 	if contact.ID.CalcDistance(target.ID).Less(closest.ID.CalcDistance(target.ID)) {
-	// 		closest = contact
-	// 	}
-	// }
-	//async FIND_NODE RPC to the closest nodes in shortlist
-	//wait for responses
-	//k closest nodes per call and put them into shortlist
-	//sort and remove duplicates in shortlist and cut at k
-	//repeat until no closer nodes are found
-
-	shortlist := kademlia.RoutingTable.FindClosestContacts(target.ID, 3)
-	closest := shortlist[0]
+	shortlist := ContactCandidates{}
+	shortlist.contacts = kademlia.RoutingTable.FindClosestContacts(target.ID, 3)
+	closest := shortlist.contacts[0]
 	probed := make(map[string]bool)
 	probed[closest.ID.String()] = true
+	queue := make(chan ContactCandidates, k)
 
 	for {
 		lastClosest := closest
 
-		for _, contact := range shortlist {
+		for _, contact := range shortlist.contacts {
+			// Skip if already probed to prevent dupes
 			if _, ok := probed[contact.ID.String()]; ok {
 				continue
 			}
 			probed[contact.ID.String()] = true
 
-			//TODO: async FIND_NODE RPC to the closest nodes in shortlist
-			res, err := kademlia.Network.SendFindContactMessage(target, &contact)
-			if err != nil {
-				fmt.Println("Error listening:", err.Error())
-				continue
-			}
-			// res.Sort()
-			// closest = shortlist[0]
+			//async FIND_NODE RPC to the closest nodes in shortlist
+			go func(contact *Contact) {
+				res, err := kademlia.Network.SendFindContactMessage(target, contact)
 
-			shortlist = append(shortlist, res.contacts...)
+				if err != nil {
+					fmt.Println("Error listening:", err.Error())
+					return // If it fails to reply, it won't be added to the shortlist
+				}
+
+				queue <- res
+
+			}(&contact)
+
 		}
 
-		// Sort and remove duplicates in shortlist and cut at k
-		// shortlist = kademlia.RoutingTable.SortClosestContacts(shortlist, target.ID)
-		// shortlist = kademlia.RoutingTable.RemoveDuplicates(shortlist)
-		// if len(shortlist) > kademlia.k {
-		// 	shortlist = shortlist[:kademlia.k]
-		// }
+		// Wait for all responses
+		close(queue)
+		for t := range queue {
+			// Add all new contacts to the shortlist
+			shortlist.Append(t.contacts)
+		}
+
+		// Sort shortlist
+		shortlist.Sort()
+
+		// Pick all alpha closest nodes as the new shortlist
+		if shortlist.Len() > alpha {
+			shortlist.contacts = shortlist.GetContacts(alpha)
+		}
 
 		// Exit the loop if no closer nodes are found
-		closest = shortlist[0]
+		closest = shortlist.contacts[0]
 		if closest.ID.Equals(lastClosest.ID) {
 			break
 		}
 	}
 	return closest
 
-}
-
-func contains[T comparable](s []T, e T) bool {
-	for _, v := range s {
-		if v == e {
-			return true
-		}
-	}
-	return false
 }
 
 func (kademlia *Kademlia) LookupData(hash string) (data string) {
