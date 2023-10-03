@@ -56,6 +56,7 @@ func (kademlia *Kademlia) initNode() {
 			if err == nil {
 				// Bootstrap node is alive, connect to it
 				kademlia.Network.Listen(bootstrapAddress) //TODO: Fix the listening function
+				break
 			} else {
 				// Error log
 			}
