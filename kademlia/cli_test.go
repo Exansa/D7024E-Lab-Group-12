@@ -1,10 +1,6 @@
 package d7024e
 
-import (
-	"bytes"
-)
-
-var buf bytes.Buffer
+// var buf bytes.Buffer
 
 // func TestCLIPing(t *testing.T) {
 // 	fmt.Println("TestCLI")
