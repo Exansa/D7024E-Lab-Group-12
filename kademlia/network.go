@@ -34,6 +34,12 @@ const (
 	FIND_VALUE msgType = "FIND_VALUE"
 )
 
+func NewNetwork(kademlia *Kademlia) *Network {
+	network := Network{}
+	network.Kademlia = *kademlia
+	return &network
+}
+
 func (network *Network) handleRequest(conn net.Conn) {
 	// read incoming message and decode it
 	packet := make([]byte, 1024)

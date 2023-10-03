@@ -11,13 +11,25 @@ const alpha = 3
 const k = 20
 
 type Kademlia struct {
-	ID           int               //id
-	IP           string            //ip
-	PORT         int               //port
+	ID           *KademliaID       //id
+	ADDRESS      string            //ip:port
 	DataStore    map[string][]byte //data storage
 	Bootstrap    bool              //bootstrap eller inte
 	RoutingTable *RoutingTable     //routingtable
 	Network      *Network          //network
+}
+
+func NewKademlia(address string, bootstrap bool) *Kademlia {
+	kademlia := Kademlia{}
+
+	kademlia.ID = NewKademliaID(address)
+	kademlia.ADDRESS = address
+	kademlia.DataStore = make(map[string][]byte)
+	kademlia.Bootstrap = bootstrap //TODO: Implement logic for bootstrap here
+	kademlia.RoutingTable = NewRoutingTable(NewContact(kademlia.ID, address))
+	kademlia.Network = NewNetwork(&kademlia)
+
+	return &kademlia
 }
 
 func (kademlia *Kademlia) LookupContact(target *Contact) Contact {

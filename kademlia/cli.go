@@ -3,11 +3,12 @@ package d7024e
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 )
 
-func CLI(kademlia *Kademlia) {
+func CLI(stdin io.Reader, kademlia *Kademlia) {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
