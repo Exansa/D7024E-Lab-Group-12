@@ -38,8 +38,21 @@ func (kademlia *Kademlia) setNodeID(id *KademliaID) {
 	kademlia.Network = NewNetwork(kademlia)
 }
 
+// Checks if the node is initialized
+//
+// PANICS if the node is in an inconsistent state
+func (kademlia *Kademlia) isInitialized() bool {
+	if kademlia.ID != nil && kademlia.RoutingTable != nil && kademlia.Network != nil {
+		return true
+	} else if kademlia.ID == nil && kademlia.RoutingTable == nil && kademlia.Network == nil {
+		return false
+	} else {
+		panic("Kademlia is in an inconsistent state")
+	}
+}
+
 func (kademlia *Kademlia) initNode() {
-	bootstrapAddress := "??????:????"
+	bootstrapAddress := "localhost:8000"
 	bootstrapID := NewKademliaID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
 	// Check if bootstrap node
 	if kademlia.Bootstrap {
@@ -57,7 +70,7 @@ func (kademlia *Kademlia) initNode() {
 			err := kademlia.Network.SendPingMessage(&bootstrapContact)
 			if err == nil {
 				// Bootstrap node is alive, connect to it
-				kademlia.Network.Listen(bootstrapAddress) //TODO: Fix the listening function
+				kademlia.Network.Client.InitConnection(bootstrapAddress) //TODO: Fix the listening function
 				break
 			} else {
 				// Error log

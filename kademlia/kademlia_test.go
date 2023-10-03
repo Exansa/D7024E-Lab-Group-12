@@ -16,9 +16,16 @@ func TestNewKademlia(t *testing.T) {
 	}
 }
 
-func TestInitNode(t *testing.T) {
+func TestInitRootNode(t *testing.T) {
 	fmt.Println("TestNodeInit")
 	kademlia := NewKademlia("localhost:9999", true)
 	kademlia.initNode()
+	fmt.Println(kademlia.isInitialized())
+}
 
+func TestInitChildNode(t *testing.T) {
+	fmt.Println("TestNodeInit")
+	kademlia := NewKademlia("localhost:9999", false)
+	kademlia.initNode()
+	fmt.Println(kademlia.isInitialized())
 }
