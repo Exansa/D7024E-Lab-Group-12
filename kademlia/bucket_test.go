@@ -29,3 +29,16 @@ func TestAddContact(t *testing.T) {
 		fmt.Println("Bucket length is 2")
 	}
 }
+
+func TestGetContactAndCalcDistance(t *testing.T) {
+	bucket := newBucket()
+	newID1 := NewRandomKademliaID()
+	contactInfo1 := NewContact(newID1, "10.0.0.2")
+	bucket.AddContact(contactInfo1)
+	result := bucket.GetContactAndCalcDistance(newID1)
+	if result[0].distance == nil {
+		t.Errorf("Distance is nil")
+	} else {
+		fmt.Println("Distance is not nil")
+	}
+}
