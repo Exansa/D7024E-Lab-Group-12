@@ -19,17 +19,50 @@ type Kademlia struct {
 	Network      *Network          //network
 }
 
-func NewKademlia(address string, bootstrap bool) *Kademlia {
+func NewKademlia(address string, bootstrap bool) (*Kademlia, error) {
 	kademlia := Kademlia{}
 
-	kademlia.ID = NewKademliaID(address)
+	kademlia.ID = nil // Will get set during init
 	kademlia.ADDRESS = address
 	kademlia.DataStore = make(map[string][]byte)
 	kademlia.Bootstrap = bootstrap //TODO: Implement logic for bootstrap here
 	kademlia.RoutingTable = NewRoutingTable(NewContact(kademlia.ID, address))
 	kademlia.Network = NewNetwork(&kademlia)
 
-	return &kademlia
+	kademlia.initNode()
+
+	if kademlia.ID == nil {
+		return &kademlia, fmt.Errorf("ID is nil")
+	}
+
+	return &kademlia, nil
+}
+
+func (kademlia *Kademlia) initNode() {
+	bootstrapAddress := "??????:????"
+	bootstrapID := NewKademliaID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+	// Check if bootstrap node
+	if kademlia.Bootstrap {
+		// Set static ID to bootstrap node for easy access
+		kademlia.ID = bootstrapID
+	} else {
+		// Set a random ID
+		kademlia.ID = NewRandomKademliaID()
+		// Find and contact bootstrap node with static ID
+		bootstrapContact := NewContact(bootstrapID, bootstrapAddress)
+		//TODO: Ping bootstrap node until it responds
+		for {
+			err := kademlia.Network.SendPingMessage(&bootstrapContact)
+			if err != nil {
+				// Bootstrap node is alive, connect to it
+				kademlia.Network.Listen(bootstrapAddress) //TODO: Fix the listening function
+			} else {
+				// Error log
+			}
+		}
+	}
+
+	// Await content updates
 }
 
 func (kademlia *Kademlia) LookupContact(target *Contact) Contact {

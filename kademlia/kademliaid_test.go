@@ -9,7 +9,14 @@ func TestKademliaID(t *testing.T) {
 	fmt.Println("TestKademliaID")
 }
 
-func TestNewKademlia(t *testing.T) {
-	kademlia := NewKademlia("10.0.0.2:9999", true)
-	fmt.Println(kademlia.ADDRESS)
+func TestNewKademliaID(t *testing.T) {
+	fmt.Println("TestNewKademliaID")
+	kID := NewKademliaID("FFFFFFFF00000000000000000000000000000000")
+	fmt.Println(kID.String())
+}
+
+func TestNewRandomKademliaID(t *testing.T) {
+	fmt.Println("TestNewRandomKademliaID")
+	kID := NewRandomKademliaID()
+	fmt.Println(kID.String())
 }
