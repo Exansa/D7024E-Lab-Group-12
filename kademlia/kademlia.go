@@ -19,23 +19,23 @@ type Kademlia struct {
 	Network      *Network          //network
 }
 
-func NewKademlia(address string, bootstrap bool) (*Kademlia, error) {
+func NewKademlia(address string, bootstrap bool) *Kademlia {
 	kademlia := Kademlia{}
 
 	kademlia.ID = nil // Will get set during init
 	kademlia.ADDRESS = address
 	kademlia.DataStore = make(map[string][]byte)
 	kademlia.Bootstrap = bootstrap //TODO: Implement logic for bootstrap here
-	kademlia.RoutingTable = NewRoutingTable(NewContact(kademlia.ID, address))
-	kademlia.Network = NewNetwork(&kademlia)
+	kademlia.RoutingTable = nil    // Will get set during init
+	kademlia.Network = nil         // Will get set during init
 
-	kademlia.initNode()
+	return &kademlia
+}
 
-	if kademlia.ID == nil {
-		return &kademlia, fmt.Errorf("ID is nil")
-	}
-
-	return &kademlia, nil
+func (kademlia *Kademlia) setNodeID(id *KademliaID) {
+	kademlia.ID = id
+	kademlia.RoutingTable = NewRoutingTable(NewContact(kademlia.ID, kademlia.ADDRESS))
+	kademlia.Network = NewNetwork(kademlia)
 }
 
 func (kademlia *Kademlia) initNode() {
@@ -44,10 +44,12 @@ func (kademlia *Kademlia) initNode() {
 	// Check if bootstrap node
 	if kademlia.Bootstrap {
 		// Set static ID to bootstrap node for easy access
-		kademlia.ID = bootstrapID
+		kademlia.setNodeID(bootstrapID)
+
 	} else {
 		// Set a random ID
-		kademlia.ID = NewRandomKademliaID()
+		kademlia.setNodeID(NewRandomKademliaID())
+
 		// Find and contact bootstrap node with static ID
 		bootstrapContact := NewContact(bootstrapID, bootstrapAddress)
 		//TODO: Ping bootstrap node until it responds
