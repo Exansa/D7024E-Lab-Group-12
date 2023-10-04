@@ -3,7 +3,6 @@ package d7024e
 import (
 	"crypto/sha1"
 	"encoding/hex"
-	"fmt"
 	"sync"
 )
 
@@ -38,8 +37,21 @@ func (kademlia *Kademlia) setNodeID(id *KademliaID) {
 	kademlia.Network = NewNetwork(kademlia)
 }
 
+// Checks if the node is initialized
+//
+// PANICS if the node is in an inconsistent state
+func (kademlia *Kademlia) isInitialized() bool {
+	if kademlia.ID != nil && kademlia.RoutingTable != nil && kademlia.Network != nil {
+		return true
+	} else if kademlia.ID == nil && kademlia.RoutingTable == nil && kademlia.Network == nil {
+		return false
+	} else {
+		panic("Kademlia is in an inconsistent state")
+	}
+}
+
 func (kademlia *Kademlia) initNode() {
-	bootstrapAddress := "??????:????"
+	bootstrapAddress := "localhost:8000"
 	bootstrapID := NewKademliaID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
 	// Check if bootstrap node
 	if kademlia.Bootstrap {
@@ -68,10 +80,10 @@ func (kademlia *Kademlia) initNode() {
 	// Await content updates
 }
 
-func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
+func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 
 	shortlist := ContactCandidates{}
-	shortlist.contacts = kademlia.RoutingTable.FindClosestContacts(target.ID, 3)
+	shortlist.contacts = kademlia.RoutingTable.FindClosestContacts(target, 3)
 	closest := shortlist.contacts[0]
 	probed := make(map[string]bool)
 	probed[closest.ID.String()] = true
@@ -93,13 +105,13 @@ func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
 			//async FIND_NODE RPC to the closest nodes in shortlist
 			go func(contact *Contact) {
 
-				res, err := kademlia.Network.SendFindContactMessage(target, contact)
+				res := kademlia.Network.findNode(target, contact)
 
-				if err != nil {
-					fmt.Println("Error listening:", err.Error())
-					wg.Done()
-					return // If it fails to reply, it won't be added to the shortlist
-				}
+				// if err != nil {
+				// 	fmt.Println("Error listening:", err.Error())
+				// 	wg.Done()
+				// 	return // If it fails to reply, it won't be added to the shortlist
+				// }
 
 				queue <- res
 				wg.Done()
@@ -130,7 +142,7 @@ func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
 			break
 		}
 	}
-	return closest
+	return shortlist
 
 }
 
