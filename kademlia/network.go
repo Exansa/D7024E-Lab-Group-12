@@ -56,14 +56,30 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case FIND_NODE:
 		// send closest nodes using kademlia func lookupcontact
+		network.findNode(&msg.Data.NODE, &msg.Sender)
 
-		network.Kademlia.LookupContact(&msg.Data.NODE)
+	case FOUND_NODE:
+		//TODO:
 
 	case FIND_VALUE:
 		// based on hash, find data using kademlia func lookupdata
-		network.Kademlia.LookupData(msg.Data.VALUE)
+		data := network.Kademlia.LookupData(msg.Data.VALUE)
+		if data != "" {
+			network.SendFoundDataMessage(data, &msg.Sender)
+		}
+
+	case FOUND_VALUE:
+		//TODO:
 
 	default:
 		fmt.Println("Message type not found")
 	}
+}
+
+func (network *Network) findNode(target *KademliaID, sender *Contact) ContactCandidates {
+	contacts := network.Kademlia.LookupContact(target)
+	if contacts.Len() > 0 {
+		network.SendFoundContactMessage(contacts, sender)
+	}
+	return contacts
 }

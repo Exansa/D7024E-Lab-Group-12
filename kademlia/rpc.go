@@ -17,16 +17,19 @@ type msgData struct {
 	STORE []byte
 	HASH  string
 	NODE  KademliaID
+	NODES ContactCandidates
 	VALUE string
 }
 
 type msgType string
 
 const (
-	PING       msgType = "PING"
-	STORE      msgType = "STORE"
-	FIND_NODE  msgType = "FIND_NODE"
-	FIND_VALUE msgType = "FIND_VALUE"
+	PING        msgType = "PING"
+	STORE       msgType = "STORE"
+	FIND_NODE   msgType = "FIND_NODE"
+	FOUND_NODE  msgType = "FOUND_NODE"
+	FIND_VALUE  msgType = "FIND_VALUE"
+	FOUND_VALUE msgType = "FOUND_VALUE"
 )
 
 func sendMessage(msg *RPC) {
@@ -75,11 +78,31 @@ func (network *Network) SendFindContactMessage(target *KademliaID, receiver *Con
 	return ContactCandidates{}, nil
 }
 
+func (network *Network) SendFoundContactMessage(contact ContactCandidates, receiver *Contact) error {
+	newMsg := new(RPC)
+	newMsg.Type = FOUND_NODE
+	newMsg.Sender = network.Kademlia.RoutingTable.me
+	newMsg.Receiver = *receiver
+	newMsg.Data.NODES = contact
+	sendMessage(newMsg)
+	return nil
+}
+
 func (network *Network) SendFindDataMessage(hash string) error {
 	newMsg := new(RPC)
 	newMsg.Type = FIND_NODE
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Data.VALUE = hash
+	sendMessage(newMsg)
+	return nil
+}
+
+func (network *Network) SendFoundDataMessage(data string, receiver *Contact) error {
+	newMsg := new(RPC)
+	newMsg.Type = FOUND_VALUE
+	newMsg.Sender = network.Kademlia.RoutingTable.me
+	newMsg.Receiver = *receiver
+	newMsg.Data.VALUE = string(data)
 	sendMessage(newMsg)
 	return nil
 }

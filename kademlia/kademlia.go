@@ -3,7 +3,6 @@ package d7024e
 import (
 	"crypto/sha1"
 	"encoding/hex"
-	"fmt"
 	"sync"
 )
 
@@ -81,7 +80,7 @@ func (kademlia *Kademlia) initNode() {
 	// Await content updates
 }
 
-func (kademlia *Kademlia) LookupContact(target *KademliaID) Contact {
+func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 
 	shortlist := ContactCandidates{}
 	shortlist.contacts = kademlia.RoutingTable.FindClosestContacts(target, 3)
@@ -106,13 +105,13 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID) Contact {
 			//async FIND_NODE RPC to the closest nodes in shortlist
 			go func(contact *Contact) {
 
-				res, err := kademlia.Network.SendFindContactMessage(target, contact)
+				res := kademlia.Network.findNode(target, contact)
 
-				if err != nil {
-					fmt.Println("Error listening:", err.Error())
-					wg.Done()
-					return // If it fails to reply, it won't be added to the shortlist
-				}
+				// if err != nil {
+				// 	fmt.Println("Error listening:", err.Error())
+				// 	wg.Done()
+				// 	return // If it fails to reply, it won't be added to the shortlist
+				// }
 
 				queue <- res
 				wg.Done()
@@ -143,7 +142,7 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID) Contact {
 			break
 		}
 	}
-	return closest
+	return shortlist
 
 }
 
