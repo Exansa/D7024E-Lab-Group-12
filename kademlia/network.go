@@ -55,7 +55,10 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 		network.Kademlia.StoreValue(msg.Data.STORE, msg.Data.HASH)
 
 	case FIND_NODE:
-		// send closest nodes
+		// send closest nodes using kademlia func lookupcontact
+
+		network.Kademlia.LookupContact(&msg.Data.NODE)
+
 	case FIND_VALUE:
 		// based on hash, find data using kademlia func lookupdata
 		network.Kademlia.LookupData(msg.Data.VALUE)

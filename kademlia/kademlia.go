@@ -81,10 +81,10 @@ func (kademlia *Kademlia) initNode() {
 	// Await content updates
 }
 
-func (kademlia *Kademlia) LookupContact(target *Contact) Contact {
+func (kademlia *Kademlia) LookupContact(target *KademliaID) Contact {
 
 	shortlist := ContactCandidates{}
-	shortlist.contacts = kademlia.RoutingTable.FindClosestContacts(target.ID, 3)
+	shortlist.contacts = kademlia.RoutingTable.FindClosestContacts(target, 3)
 	closest := shortlist.contacts[0]
 	probed := make(map[string]bool)
 	probed[closest.ID.String()] = true

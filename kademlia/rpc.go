@@ -16,7 +16,7 @@ type msgData struct {
 	PING  string
 	STORE []byte
 	HASH  string
-	NODE  Contact
+	NODE  KademliaID
 	VALUE string
 }
 
@@ -65,7 +65,7 @@ func (network *Network) SendPongMessage(contact *Contact) error {
 	return nil
 }
 
-func (network *Network) SendFindContactMessage(target *Contact, receiver *Contact) (ContactCandidates, error) { //trasig
+func (network *Network) SendFindContactMessage(target *KademliaID, receiver *Contact) (ContactCandidates, error) { //trasig
 	newMsg := new(RPC)
 	newMsg.Type = FIND_NODE
 	newMsg.Sender = network.Kademlia.RoutingTable.me
