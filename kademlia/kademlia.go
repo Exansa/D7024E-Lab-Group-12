@@ -66,7 +66,7 @@ func (kademlia *Kademlia) initNode() {
 		bootstrapContact := NewContact(bootstrapID, bootstrapAddress)
 		//TODO: Ping bootstrap node until it responds
 		for {
-			err := kademlia.Network.SendPingMessage(&bootstrapContact)
+			err := kademlia.Network.ping(&bootstrapContact)
 			if err == nil {
 				// Bootstrap node is alive, connect to it
 				kademlia.Network.Listen(bootstrapAddress) //TODO: Fix the listening function

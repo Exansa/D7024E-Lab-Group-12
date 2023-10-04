@@ -17,7 +17,6 @@ func NewNetwork(kademlia *Kademlia) *Network {
 	network.Kademlia = kademlia
 	network.msgChan = make(chan RPC)
 	network.dataChan = make(chan []byte)
-
 	return &network
 }
 
@@ -50,6 +49,10 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 	case PING:
 		network.SendPongMessage(&msg.Sender)
 
+	case PONG:
+		//TODO:
+		network.msgChan <- *msg
+
 	case STORE:
 		// store data using kademlia func store
 		network.Kademlia.StoreValue(msg.Data.STORE, msg.Data.HASH)
@@ -60,6 +63,7 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case FOUND_NODE:
 		//TODO:
+		network.msgChan <- *msg
 
 	case FIND_VALUE:
 		// based on hash, find data using kademlia func lookupdata
@@ -70,6 +74,8 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case FOUND_VALUE:
 		//TODO:
+		network.msgChan <- *msg
+		network.dataChan <- msg.Data.STORE
 
 	default:
 		fmt.Println("Message type not found")
@@ -82,4 +88,15 @@ func (network *Network) findNode(target *KademliaID, sender *Contact) ContactCan
 		network.SendFoundContactMessage(contacts, sender)
 	}
 	return contacts
+}
+
+func (network *Network) ping(contact *Contact) error {
+	network.SendPingMessage(contact)
+	res := <-network.msgChan
+	//TODO: Await response
+	if res.Type == PONG && res.Sender.ID.Equals(contact.ID) {
+		return nil
+	} else {
+		return fmt.Errorf("ping failed")
+	}
 }

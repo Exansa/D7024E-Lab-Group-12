@@ -25,7 +25,9 @@ type msgType string
 
 const (
 	PING        msgType = "PING"
+	PONG        msgType = "PONG" //Ack
 	STORE       msgType = "STORE"
+	STORED      msgType = "STORED"
 	FIND_NODE   msgType = "FIND_NODE"
 	FOUND_NODE  msgType = "FOUND_NODE"
 	FIND_VALUE  msgType = "FIND_VALUE"
