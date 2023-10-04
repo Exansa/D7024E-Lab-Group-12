@@ -70,7 +70,7 @@ func (kademlia *Kademlia) initNode() {
 			err := kademlia.Network.SendPingMessage(&bootstrapContact)
 			if err == nil {
 				// Bootstrap node is alive, connect to it
-				kademlia.Network.Client.InitConnection(bootstrapAddress) //TODO: Fix the listening function
+				kademlia.Network.Listen(bootstrapAddress) //TODO: Fix the listening function
 				break
 			} else {
 				// Error log

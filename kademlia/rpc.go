@@ -2,7 +2,6 @@ package d7024e
 
 import (
 	"encoding/json"
-	"fmt"
 	"net"
 )
 
@@ -30,27 +29,20 @@ const (
 	FIND_VALUE msgType = "FIND_VALUE"
 )
 
-func sendMessage(msg *RPC) error {
-
+func sendMessage(msg *RPC) {
+	// Dial sender
 	conn, err := net.Dial("udp", msg.Receiver.Address)
-	if err != nil {
-		fmt.Printf("Error: %s", err)
-		return err
-	}
-	encodedMsg, err := json.Marshal(msg)
-	if err != nil {
-		fmt.Printf("Error: %s", err)
-		return err
-	}
-	//send msg
-	conn.Write(encodedMsg)
-	//check for errors between all
-	err = conn.Close()
-	if err != nil {
-		fmt.Printf("Error: %s", err)
-		return err
-	}
-	return nil
+	checkError(err)
+	defer conn.Close()
+
+	// Marshall msg
+	jsonMsg, err := json.Marshal(msg)
+	checkError(err)
+
+	// Send msg
+	_, err = conn.Write(jsonMsg)
+	checkError(err)
+
 }
 
 func (network *Network) SendPingMessage(contact *Contact) error {
@@ -59,31 +51,17 @@ func (network *Network) SendPingMessage(contact *Contact) error {
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *contact
 	newMsg.Data.PING = "Ping!"
-	err := sendMessage(newMsg)
-	if err != nil {
-		fmt.Printf("Error: %s", err)
-		return err
-	}
+	sendMessage(newMsg)
 	return nil
 }
 
-func (network *Network) SendPongMessage(contact *Contact, conn *net.UDPConn) error {
+func (network *Network) SendPongMessage(contact *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = PING
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *contact
 	newMsg.Data.PING = "Pong!"
-	encodedMsg, err := json.Marshal(newMsg)
-	if err != nil {
-		fmt.Printf("Error: %s", err)
-		return err
-	}
-	_, err = conn.Write(encodedMsg)
-	// err := sendMessage(newMsg)
-	if err != nil {
-		fmt.Printf("Error: %s", err)
-		return err
-	}
+	sendMessage(newMsg)
 	return nil
 }
 
@@ -93,11 +71,7 @@ func (network *Network) SendFindContactMessage(target *Contact, receiver *Contac
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *receiver
 	newMsg.Data.NODE = *target
-	err := sendMessage(newMsg)
-	if err != nil {
-		fmt.Printf("Error: %s", err)
-		return ContactCandidates{}, err
-	}
+	sendMessage(newMsg)
 	return ContactCandidates{}, nil
 }
 
@@ -106,11 +80,7 @@ func (network *Network) SendFindDataMessage(hash string) error {
 	newMsg.Type = FIND_NODE
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Data.VALUE = hash
-	err := sendMessage(newMsg)
-	if err != nil {
-		fmt.Printf("Error: %s", err)
-		return err
-	}
+	sendMessage(newMsg)
 	return nil
 }
 
@@ -123,11 +93,7 @@ func (network *Network) SendStoreMessage(data []byte) error {
 	if !self {
 		newMsg.Receiver = receiver
 		newMsg.Data.HASH = dataHash
-		err := sendMessage(newMsg)
-		if err != nil {
-			fmt.Printf("Error: %s", err)
-			return err
-		}
+		sendMessage(newMsg)
 	}
 	return nil
 }
