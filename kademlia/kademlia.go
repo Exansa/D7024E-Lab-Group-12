@@ -1,8 +1,8 @@
 package d7024e
 
 import (
-	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
 	"sync"
 )
 
@@ -72,6 +72,9 @@ func (kademlia *Kademlia) initNode() {
 				kademlia.Network.Listen(bootstrapAddress) //TODO: Fix the listening function
 				break
 			} else {
+				fmt.Println("Bootstrap node is not alive, booting as bootstrap node")
+				kademlia.Bootstrap = true
+				kademlia.initNode()
 				// Error log
 			}
 		}
@@ -159,7 +162,8 @@ func (kademlia *Kademlia) GetData(hash string) (data []byte) {
 
 func (kademlia *Kademlia) Store(data []byte) (self bool, closest Contact, dataHash string) {
 	// get hash of data
-	dataHash = hex.EncodeToString(sha1.New().Sum(data))
+	//dataHash = hex.EncodeToString(sha1.New().Sum(data))
+	dataHash = hex.EncodeToString(hashData(data))
 	dataKey := NewKademliaID(dataHash)
 
 	// find closest nodes, Maybe use lookupcontact?

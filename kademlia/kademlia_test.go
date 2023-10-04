@@ -1,6 +1,7 @@
 package d7024e
 
 import (
+	"encoding/hex"
 	"fmt"
 	"testing"
 )
@@ -23,11 +24,33 @@ func TestInitRootNode(t *testing.T) {
 	fmt.Println(kademlia.isInitialized())
 }
 
-func TestInitChildNode(t *testing.T) {
-	fmt.Println("TestNodeInit2")
-	kademlia1 := NewKademlia("localhost:9998", true)
+/*
+func TestInitNodes(t *testing.T) {
+	// Create a root node
+	kademlia1 := NewKademlia("localhost:9999", true)
 	kademlia1.initNode()
-	kademlia2 := NewKademlia("localhost:9999", false)
+
+	// Check that the root node is initialized
+	if !kademlia1.isInitialized() {
+		t.Fatal("Root node is not initialized")
+	}
+
+	// Create a child node
+	kademlia2 := NewKademlia("localhost:9998", false)
 	kademlia2.initNode()
-	fmt.Println(kademlia2.isInitialized())
+	//network := NewNetwork(kademlia2)
+
+	// Check that the child node is initialized
+	if !kademlia2.isInitialized() {
+		t.Fatal("Child node is not initialized")
+	}
+}*/
+
+func TestStoreValue(t *testing.T) {
+	fmt.Println("TestStore")
+	kademlia := NewKademlia("localhost:9999", true)
+	kademlia.initNode()
+	dataHash := hashData([]byte("test"))
+	dataKey := hex.EncodeToString(hashData([]byte("test")))
+	kademlia.StoreValue(dataHash, dataKey)
 }

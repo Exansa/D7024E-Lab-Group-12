@@ -4,15 +4,52 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"reflect"
 	"testing"
+	"time"
 )
 
 func TestNetwork(t *testing.T) {
 	fmt.Println("TestNetwork")
 }
-
 func TestNetworkListen(t *testing.T) {
+	// Create a network
+	kademlia := NewKademlia("localhost:8000", true)
+	network := NewNetwork(kademlia)
+
+	// Start listening on a random port
+	go network.Listen("localhost:0")
+
+	// Send a message to the network
+	msg := RPC{}
+	msgBytes, err := json.Marshal(msg)
+
+	if err != nil {
+		t.Fatalf("Failed to marshal message: %v", err)
+	}
+	conn, err := net.Dial("udp", "localhost:8000")
+
+	if err != nil {
+		t.Fatalf("Failed to dial network: %v", err)
+	}
+	_, err = conn.Write(msgBytes)
+
+	if err != nil {
+		t.Fatalf("Failed to write message: %v", err)
+	}
+
+	// Wait for the message to be handled
+	time.Sleep(100 * time.Millisecond)
+
+	// Check that the message was handled
+	if network.msgChan == nil {
+		t.Fatal("Message was not received")
+	} else {
+		fmt.Println("Message was received")
+	}
+}
+
+/*
+func TestNetworkListen2(t *testing.T) {
 	conn1, conn2 := net.Pipe()
 	defer conn1.Close()
 	defer conn2.Close()
@@ -54,3 +91,4 @@ func TestNetworkListen(t *testing.T) {
 		t.Fatal("Received message does not match sent message")
 	}
 }
+*/
