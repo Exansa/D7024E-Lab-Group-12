@@ -18,7 +18,7 @@ func TestNetworkPingProcess(t *testing.T) {
 	sender := NewKademlia("localhost:8001", false)
 	sender.setNodeID(NewRandomKademliaID())
 
-	// Start listening on a random port
+	// Start listening after messages
 	go receiver.Network.Listen()
 	go sender.Network.Listen()
 
@@ -47,7 +47,7 @@ func TestNetworkPingFunction(t *testing.T) {
 	sender := NewKademlia("localhost:8001", false)
 	sender.setNodeID(NewRandomKademliaID())
 
-	// Start listening on a random port
+	// Start listening after messages
 	go receiver.Network.Listen()
 	go sender.Network.Listen()
 
