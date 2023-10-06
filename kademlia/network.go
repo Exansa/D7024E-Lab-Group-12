@@ -20,9 +20,11 @@ func NewNetwork(kademlia *Kademlia) *Network {
 	return &network
 }
 
-func (network *Network) Listen(addr string) {
-	udpAddr, err := net.ResolveUDPAddr("udp", addr)
+func (network *Network) Listen() {
+	udpAddr, err := net.ResolveUDPAddr("udp", network.Kademlia.ADDRESS)
 	checkError(err)
+
+	fmt.Println("Listening on", udpAddr.IP)
 
 	conn, err := net.ListenUDP("udp", udpAddr)
 	checkError(err)
@@ -43,6 +45,8 @@ func (network *Network) Listen(addr string) {
 }
 
 func (network *Network) handleRequest(msg *RPC) { // Server side
+	fmt.Println("Handling request from", msg.Sender.Address)
+	fmt.Println("Message type:", msg.Type)
 
 	// switch case for different message types
 	switch msg.Type {
@@ -91,10 +95,14 @@ func (network *Network) findNode(target *KademliaID, sender *Contact) ContactCan
 }
 
 func (network *Network) ping(contact *Contact) error {
+	//TODO: Add timeout
+
 	network.SendPingMessage(contact)
 	res := <-network.msgChan
-	//TODO: Await response
+
 	if res.Type == PONG && res.Sender.ID.Equals(contact.ID) {
+		// Add contact to routing table
+		network.Kademlia.RoutingTable.AddContact(*contact)
 		return nil
 	} else {
 		return fmt.Errorf("ping failed")

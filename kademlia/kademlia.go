@@ -2,7 +2,6 @@ package d7024e
 
 import (
 	"encoding/hex"
-	"fmt"
 	"sync"
 )
 
@@ -51,12 +50,13 @@ func (kademlia *Kademlia) isInitialized() bool {
 }
 
 func (kademlia *Kademlia) initNode() {
-	bootstrapAddress := "localhost:8000"
+	bootstrapAddress := "localhost:0"
 	bootstrapID := NewKademliaID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
 	// Check if bootstrap node
 	if kademlia.Bootstrap {
 		// Set static ID to bootstrap node for easy access
 		kademlia.setNodeID(bootstrapID)
+		kademlia.Network.Listen()
 
 	} else {
 		// Set a random ID
@@ -64,18 +64,15 @@ func (kademlia *Kademlia) initNode() {
 
 		// Find and contact bootstrap node with static ID
 		bootstrapContact := NewContact(bootstrapID, bootstrapAddress)
-		//TODO: Ping bootstrap node until it responds
+
 		for {
 			err := kademlia.Network.ping(&bootstrapContact)
 			if err == nil {
-				// Bootstrap node is alive, connect to it
-				kademlia.Network.Listen(bootstrapAddress) //TODO: Fix the listening function
+				// Bootstrap node is alive and has added you as a contact, init connection
+				kademlia.Network.Listen()
 				break
 			} else {
-				fmt.Println("Bootstrap node is not alive, booting as bootstrap node")
-				kademlia.Bootstrap = true
-				kademlia.initNode()
-				// Error log
+				// TODO: After a certain amount of tries, set bootstrap node to self
 			}
 		}
 	}

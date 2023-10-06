@@ -19,7 +19,7 @@ func TestNewKademlia(t *testing.T) {
 
 func TestInitRootNode(t *testing.T) {
 	fmt.Println("TestNodeInit1")
-	kademlia := NewKademlia("localhost:9999", true)
+	kademlia := NewKademlia("localhost:0", true)
 	kademlia.initNode()
 	fmt.Println(kademlia.isInitialized())
 }

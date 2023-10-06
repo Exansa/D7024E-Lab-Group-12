@@ -62,7 +62,7 @@ func (network *Network) SendPingMessage(contact *Contact) error {
 
 func (network *Network) SendPongMessage(contact *Contact) error {
 	newMsg := new(RPC)
-	newMsg.Type = PING
+	newMsg.Type = PONG
 	newMsg.Sender = network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *contact
 	newMsg.Data.PING = "Pong!"
