@@ -2,22 +2,21 @@ package d7024e
 
 const bucketSize = 20
 
-
 // RoutingTable definition
 // keeps a refrence contact of me and an array of buckets
 type RoutingTable struct {
-	me      Contact
+	me      *Contact
 	buckets [IDLength * 8]*bucket
 }
 
 // NewRoutingTable returns a new instance of a RoutingTable
-func NewRoutingTable(me Contact) *RoutingTable {
-	routingTable := &RoutingTable{}
+func NewRoutingTable(me *Contact) *RoutingTable {
+	routingTable := RoutingTable{}
 	for i := 0; i < IDLength*8; i++ {
 		routingTable.buckets[i] = newBucket()
 	}
 	routingTable.me = me
-	return routingTable
+	return &routingTable
 }
 
 // AddContact add a new contact to the correct Bucket

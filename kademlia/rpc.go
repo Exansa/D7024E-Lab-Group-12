@@ -53,7 +53,7 @@ func sendMessage(msg *RPC) {
 func (network *Network) SendPingMessage(contact *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = PING
-	newMsg.Sender = network.Kademlia.RoutingTable.me
+	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *contact
 	newMsg.Data.PING = "Ping!"
 	sendMessage(newMsg)
@@ -63,7 +63,7 @@ func (network *Network) SendPingMessage(contact *Contact) error {
 func (network *Network) SendPongMessage(contact *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = PONG
-	newMsg.Sender = network.Kademlia.RoutingTable.me
+	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *contact
 	newMsg.Data.PING = "Pong!"
 	sendMessage(newMsg)
@@ -73,7 +73,7 @@ func (network *Network) SendPongMessage(contact *Contact) error {
 func (network *Network) SendFindContactMessage(target *KademliaID, receiver *Contact) (ContactCandidates, error) { //trasig
 	newMsg := new(RPC)
 	newMsg.Type = FIND_NODE
-	newMsg.Sender = network.Kademlia.RoutingTable.me
+	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *receiver
 	newMsg.Data.NODE = *target
 	sendMessage(newMsg)
@@ -83,7 +83,7 @@ func (network *Network) SendFindContactMessage(target *KademliaID, receiver *Con
 func (network *Network) SendFoundContactMessage(contact ContactCandidates, receiver *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = FOUND_NODE
-	newMsg.Sender = network.Kademlia.RoutingTable.me
+	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *receiver
 	newMsg.Data.NODES = contact
 	sendMessage(newMsg)
@@ -93,7 +93,7 @@ func (network *Network) SendFoundContactMessage(contact ContactCandidates, recei
 func (network *Network) SendFindDataMessage(hash string) error {
 	newMsg := new(RPC)
 	newMsg.Type = FIND_NODE
-	newMsg.Sender = network.Kademlia.RoutingTable.me
+	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Data.VALUE = hash
 	sendMessage(newMsg)
 	return nil
@@ -102,7 +102,7 @@ func (network *Network) SendFindDataMessage(hash string) error {
 func (network *Network) SendFoundDataMessage(data string, receiver *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = FOUND_VALUE
-	newMsg.Sender = network.Kademlia.RoutingTable.me
+	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *receiver
 	newMsg.Data.VALUE = string(data)
 	sendMessage(newMsg)
@@ -112,7 +112,7 @@ func (network *Network) SendFoundDataMessage(data string, receiver *Contact) err
 func (network *Network) SendStoreMessage(data []byte) error {
 	newMsg := new(RPC)
 	newMsg.Type = STORE
-	newMsg.Sender = network.Kademlia.RoutingTable.me
+	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Data.STORE = data
 	self, receiver, dataHash := network.Kademlia.Store(newMsg.Data.STORE)
 	if !self {
