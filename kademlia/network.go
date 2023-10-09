@@ -51,6 +51,7 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 	// switch case for different message types
 	switch msg.Type {
 	case PING:
+		network.Kademlia.RoutingTable.AddContact(msg.Sender)
 		network.SendPongMessage(&msg.Sender)
 
 	case PONG:

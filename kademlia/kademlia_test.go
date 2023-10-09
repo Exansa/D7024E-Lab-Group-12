@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestKademlia(t *testing.T) {
@@ -17,34 +18,17 @@ func TestNewKademlia(t *testing.T) {
 	}
 }
 
-func TestInitRootNode(t *testing.T) {
-	fmt.Println("TestNodeInit1")
-	kademlia := NewKademlia("localhost:0", true)
-	kademlia.initNode()
-	fmt.Println(kademlia.isInitialized())
+func TestInitNode(t *testing.T) {
+	fmt.Println("TestNodeInit2")
+	rootNode := NewKademlia("localhost:1337", true) //Bootstrap route
+	rootNode.initNode()
+	//wait for root node to be initialized
+	time.Sleep(100 * time.Millisecond)
+
+	childNode := NewKademlia("localhost:8000", false) //Non-bootstrap route
+	childNode.initNode()
+	fmt.Println(childNode.isInitialized())
 }
-
-/*
-func TestInitNodes(t *testing.T) {
-	// Create a root node
-	kademlia1 := NewKademlia("localhost:9999", true)
-	kademlia1.initNode()
-
-	// Check that the root node is initialized
-	if !kademlia1.isInitialized() {
-		t.Fatal("Root node is not initialized")
-	}
-
-	// Create a child node
-	kademlia2 := NewKademlia("localhost:9998", false)
-	kademlia2.initNode()
-	//network := NewNetwork(kademlia2)
-
-	// Check that the child node is initialized
-	if !kademlia2.isInitialized() {
-		t.Fatal("Child node is not initialized")
-	}
-}*/
 
 func TestStoreValue(t *testing.T) {
 	fmt.Println("TestStore")

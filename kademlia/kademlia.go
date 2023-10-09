@@ -50,30 +50,29 @@ func (kademlia *Kademlia) isInitialized() bool {
 }
 
 func (kademlia *Kademlia) initNode() {
-	bootstrapAddress := "localhost:0"
+	bootstrapAddress := "localhost:1337"
 	bootstrapID := NewKademliaID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
 	// Check if bootstrap node
 	if kademlia.Bootstrap {
 		// Set static ID to bootstrap node for easy access
 		kademlia.setNodeID(bootstrapID)
-		kademlia.Network.Listen()
+		go kademlia.Network.Listen()
 
 	} else {
 		// Set a random ID
 		kademlia.setNodeID(NewRandomKademliaID())
+		go kademlia.Network.Listen()
 
 		// Find and contact bootstrap node with static ID
 		bootstrapContact := NewContact(bootstrapID, bootstrapAddress)
 
-		for {
-			err := kademlia.Network.ping(&bootstrapContact)
-			if err == nil {
-				// Bootstrap node is alive and has added you as a contact, init connection
-				kademlia.Network.Listen()
-				break
-			} else {
-				// TODO: After a certain amount of tries, set bootstrap node to self
-			}
+		err := kademlia.Network.ping(&bootstrapContact) //TODO: Add timeout
+		if err == nil {
+			// Bootstrap node is alive and has added you as a contact, init connection
+
+			return
+		} else {
+			// TODO: After a certain amount of tries, set bootstrap node to self
 		}
 	}
 
