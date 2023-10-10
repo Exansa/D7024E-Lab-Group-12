@@ -48,10 +48,12 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 	fmt.Println("Handling request from", msg.Sender.Address)
 	fmt.Println("Message type:", msg.Type)
 
+	// Add contact
+	network.Kademlia.RoutingTable.AddContact(msg.Sender)
+
 	// switch case for different message types
 	switch msg.Type {
 	case PING:
-		network.Kademlia.RoutingTable.AddContact(msg.Sender)
 		network.SendPongMessage(&msg.Sender)
 
 	case PONG:
@@ -106,8 +108,6 @@ func (network *Network) ping(contact *Contact) error {
 	res := <-network.msgChan
 
 	if res.Type == PONG && res.Sender.ID.Equals(contact.ID) {
-		// Add contact to routing table
-		network.Kademlia.RoutingTable.AddContact(res.Sender)
 		return nil
 	} else {
 		return fmt.Errorf("ping failed")
