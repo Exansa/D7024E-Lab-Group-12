@@ -58,7 +58,7 @@ func (kademlia *Kademlia) isBootstrapNode() bool {
 }
 
 func (kademlia *Kademlia) initNode() {
-	bootstrapAddress := "localhost:1337"
+	bootstrapAddress := "127.0.0.1:1337"
 	bootstrapID := NewKademliaID(bootstrapIDString)
 
 	// Check if bootstrap node is alive
