@@ -71,3 +71,13 @@ func (candidates *ContactCandidates) Swap(i, j int) {
 func (candidates *ContactCandidates) Less(i, j int) bool {
 	return candidates.Contacts[i].Less(&candidates.Contacts[j])
 }
+
+// Has returns true if the ContactCandidates contains the Contact
+func (candidates *ContactCandidates) Has(id *KademliaID) bool {
+	for _, c := range candidates.Contacts {
+		if c.ID.Equals(id) {
+			return true
+		}
+	}
+	return false
+}
