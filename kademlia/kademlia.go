@@ -2,17 +2,19 @@ package d7024e
 
 import (
 	"encoding/hex"
+	"fmt"
 	"sync"
 )
 
 const alpha = 3
 const k = 20
+const uninitIDString = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+const bootstrapIDString = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
 
 type Kademlia struct {
 	ID           *KademliaID       //id
 	ADDRESS      string            //ip:port
 	DataStore    map[string][]byte //data storage
-	Bootstrap    bool              //bootstrap eller inte
 	RoutingTable *RoutingTable     //routingtable
 	Network      *Network          //network
 }
@@ -20,63 +22,60 @@ type Kademlia struct {
 func NewKademlia(address string, bootstrap bool) *Kademlia {
 	kademlia := Kademlia{}
 
-	kademlia.ID = nil // Will get set during init
+	kademlia.ID = NewKademliaID(uninitIDString) // Placeholder until init
 	kademlia.ADDRESS = address
 	kademlia.DataStore = make(map[string][]byte)
-	kademlia.Bootstrap = bootstrap //TODO: Implement logic for bootstrap here
-	kademlia.RoutingTable = nil    // Will get set during init
-	kademlia.Network = nil         // Will get set during init
+	kademlia.Network = NewNetwork(&kademlia) // Will get set during init
+
+	me := NewContact(kademlia.ID, kademlia.ADDRESS)
+	kademlia.RoutingTable = NewRoutingTable(&me)
 
 	return &kademlia
 }
 
 func (kademlia *Kademlia) setNodeID(id *KademliaID) {
 	kademlia.ID = id
-	kademlia.RoutingTable = NewRoutingTable(NewContact(kademlia.ID, kademlia.ADDRESS))
-	kademlia.Network = NewNetwork(kademlia)
 }
 
 // Checks if the node is initialized
 //
 // PANICS if the node is in an inconsistent state
+
+func (kademlia *Kademlia) updateIDParams(id *KademliaID) {
+	kademlia.ID = id
+	me := NewContact(kademlia.ID, kademlia.ADDRESS)
+	kademlia.RoutingTable = NewRoutingTable(&me)
+}
+
 func (kademlia *Kademlia) isInitialized() bool {
-	if kademlia.ID != nil && kademlia.RoutingTable != nil && kademlia.Network != nil {
-		return true
-	} else if kademlia.ID == nil && kademlia.RoutingTable == nil && kademlia.Network == nil {
-		return false
-	} else {
-		panic("Kademlia is in an inconsistent state")
-	}
+	uninitID := NewKademliaID(uninitIDString)
+	return !kademlia.ID.Equals(uninitID)
+}
+
+func (kademlia *Kademlia) isBootstrapNode() bool {
+	bootstrapID := NewKademliaID(bootstrapIDString)
+	return kademlia.ID.Equals(bootstrapID)
 }
 
 func (kademlia *Kademlia) initNode() {
 	bootstrapAddress := "localhost:1337"
-	bootstrapID := NewKademliaID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
-	// Check if bootstrap node
-	if kademlia.Bootstrap {
-		// Set static ID to bootstrap node for easy access
-		kademlia.setNodeID(bootstrapID)
-		go kademlia.Network.Listen()
+	bootstrapID := NewKademliaID(bootstrapIDString)
 
+	// Check if bootstrap node is alive
+	bootstrapContact := NewContact(bootstrapID, bootstrapAddress)
+	go kademlia.Network.Listen()
+
+	// Try manually pinging the bootstrap node
+	err := kademlia.Network.ping(&bootstrapContact) //TODO: Add timeout
+	if err == nil {
+		// Bootstrap node is alive and has added you as a contact, init connection
+		fmt.Println("Bootstrap node is alive, initializing connection")
+		kademlia.updateIDParams(NewRandomKademliaID())
 	} else {
-		// Set a random ID
-		kademlia.setNodeID(NewRandomKademliaID())
-		go kademlia.Network.Listen()
-
-		// Find and contact bootstrap node with static ID
-		bootstrapContact := NewContact(bootstrapID, bootstrapAddress)
-
-		err := kademlia.Network.ping(&bootstrapContact) //TODO: Add timeout
-		if err == nil {
-			// Bootstrap node is alive and has added you as a contact, init connection
-
-			return
-		} else {
-			// TODO: After a certain amount of tries, set bootstrap node to self
-		}
+		// Invalid/No response from bootstrap node, set bootstrap node to self
+		fmt.Println("No response from bootstrap node, setting bootstrap node to self")
+		kademlia.updateIDParams(bootstrapID)
 	}
-
-	// Await content updates
 }
 
 func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
@@ -164,7 +163,7 @@ func (kademlia *Kademlia) Store(data []byte) (self bool, closest Contact, dataHa
 
 	// find closest nodes, Maybe use lookupcontact?
 	contacts := kademlia.RoutingTable.FindClosestContacts(dataKey, 3)
-	closest = kademlia.RoutingTable.me
+	closest = contacts[0]
 	// send store message to closest nodes
 	for _, contact := range contacts {
 		if contact.ID.CalcDistance(contact.ID).Less(closest.ID.CalcDistance(contact.ID)) {
