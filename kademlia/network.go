@@ -52,7 +52,6 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 	switch msg.Type {
 	case PING:
 		network.Kademlia.RoutingTable.AddContact(msg.Sender)
-		fmt.Printf("Received ping from %s\n", msg.Sender.ID.String())
 		network.SendPongMessage(&msg.Sender)
 
 	case PONG:
@@ -65,7 +64,6 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case FIND_NODE:
 		// send closest nodes using kademlia func lookupcontact
-		fmt.Println("Received find node message from", msg.Sender.ID.String())
 		contacts := network.Kademlia.LookupContact(&msg.Data.NODE)
 		network.SendFoundContactMessage(contacts, &msg.Sender)
 
@@ -92,7 +90,6 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCandidates, error) {
 	network.SendFindContactMessage(target, sender)
-	fmt.Println("Sent find node message to", sender.ID.String())
 	res := <-network.msgChan
 
 	if res.Type != FOUND_NODE || !res.Sender.ID.Equals(sender.ID) {
@@ -105,12 +102,8 @@ func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCa
 func (network *Network) ping(contact *Contact) error {
 	//TODO: Add timeout
 
-	fmt.Println("Sending ping to", contact.ID.String())
-
 	network.SendPingMessage(contact)
 	res := <-network.msgChan
-
-	fmt.Println("Received response from", res.Sender.ID.String())
 
 	if res.Type == PONG && res.Sender.ID.Equals(contact.ID) {
 		// Add contact to routing table
