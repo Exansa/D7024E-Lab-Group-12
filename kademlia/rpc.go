@@ -2,7 +2,6 @@ package d7024e
 
 import (
 	"encoding/json"
-	"fmt"
 	"net"
 )
 
@@ -44,9 +43,6 @@ func sendMessage(msg *RPC) {
 	// Marshall msg
 	jsonMsg, err := json.Marshal(msg)
 	checkError(err)
-
-	fmt.Println("Sending message to", msg.Receiver.Address)
-	fmt.Println("Raw data: ", string(jsonMsg))
 
 	// Send msg
 	_, err = conn.Write(jsonMsg)

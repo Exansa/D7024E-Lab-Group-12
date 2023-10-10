@@ -86,9 +86,7 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 	shortlist.Append(contacts)
 
 	for _, contact := range shortlist.Contacts {
-		fmt.Println("Checking contact:", contact.ID.String())
 		if contact.ID.Equals(target) {
-			fmt.Println("Found!!!!!!!!!!!!!!!!")
 			return shortlist
 		}
 	}

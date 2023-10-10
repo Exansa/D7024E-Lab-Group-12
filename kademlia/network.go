@@ -67,8 +67,6 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 		// send closest nodes using kademlia func lookupcontact
 		fmt.Println("Received find node message from", msg.Sender.ID.String())
 		contacts := network.Kademlia.LookupContact(&msg.Data.NODE)
-		fmt.Println("Found contacts:", contacts)
-		fmt.Println("Sending found node message to", msg.Sender.ID.String())
 		network.SendFoundContactMessage(contacts, &msg.Sender)
 
 	case FOUND_NODE:
@@ -96,8 +94,6 @@ func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCa
 	network.SendFindContactMessage(target, sender)
 	fmt.Println("Sent find node message to", sender.ID.String())
 	res := <-network.msgChan
-	fmt.Println("Received response from", res.Sender.ID.String())
-	fmt.Println("Message:", res.Data.NODES)
 
 	if res.Type != FOUND_NODE || !res.Sender.ID.Equals(sender.ID) {
 		return ContactCandidates{}, fmt.Errorf("findNode failed")
