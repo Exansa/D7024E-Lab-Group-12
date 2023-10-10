@@ -64,7 +64,7 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case FIND_NODE:
 		// send closest nodes using kademlia func lookupcontact
-		network.findNode(&msg.Data.NODE, &msg.Sender)
+		network.SendFoundContactMessage(network.Kademlia.LookupContact(&msg.Data.NODE), &msg.Sender)
 
 	case FOUND_NODE:
 		//TODO:
@@ -87,12 +87,15 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 	}
 }
 
-func (network *Network) findNode(target *KademliaID, sender *Contact) ContactCandidates {
-	contacts := network.Kademlia.LookupContact(target)
-	if contacts.Len() > 0 {
-		network.SendFoundContactMessage(contacts, sender)
+func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCandidates, error) {
+	network.SendFindContactMessage(target, sender)
+	res := <-network.msgChan
+
+	if res.Type != FOUND_NODE || !res.Sender.ID.Equals(sender.ID) {
+		return ContactCandidates{}, fmt.Errorf("findNode failed")
 	}
-	return contacts
+
+	return res.Data.NODES, nil
 }
 
 func (network *Network) ping(contact *Contact) error {
