@@ -9,7 +9,7 @@ import (
 const alpha = 3
 const k = 20
 const uninitIDString = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-const bootstrapIDString = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+const bootstrapIDString = "0000000000000000000000000000000000000000"
 
 type Kademlia struct {
 	ID           *KademliaID       //id
@@ -61,6 +61,8 @@ func (kademlia *Kademlia) initNode() {
 	bootstrapAddress := "127.0.0.1:1337"
 	bootstrapID := NewKademliaID(bootstrapIDString)
 
+	kademlia.updateIDParams(NewRandomKademliaID())
+
 	// Check if bootstrap node is alive
 	bootstrapContact := NewContact(bootstrapID, bootstrapAddress)
 	go kademlia.Network.Listen()
@@ -70,7 +72,6 @@ func (kademlia *Kademlia) initNode() {
 	if err == nil {
 		// Bootstrap node is alive and has added you as a contact, init connection
 		fmt.Println("Bootstrap node is alive, initializing connection")
-		kademlia.updateIDParams(NewRandomKademliaID())
 	} else {
 		// Invalid/No response from bootstrap node, set bootstrap node to self
 		fmt.Println("No response from bootstrap node, setting bootstrap node to self")
@@ -81,10 +82,10 @@ func (kademlia *Kademlia) initNode() {
 func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 
 	shortlist := ContactCandidates{}
-	shortlist.contacts = kademlia.RoutingTable.FindClosestContacts(target, 3)
-	closest := shortlist.contacts[0]
+	contacts := kademlia.RoutingTable.FindClosestContacts(target, 3)
+	shortlist.Append(contacts)
+	closest := *kademlia.RoutingTable.me
 	probed := make(map[string]bool)
-	probed[closest.ID.String()] = true
 	wg := sync.WaitGroup{}
 
 	for {
