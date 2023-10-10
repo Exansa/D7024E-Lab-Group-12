@@ -84,8 +84,18 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 	shortlist := ContactCandidates{}
 	contacts := kademlia.RoutingTable.FindClosestContacts(target, 3)
 	shortlist.Append(contacts)
+
+	for _, contact := range shortlist.contacts {
+		fmt.Println("Checking contact:", contact.ID.String())
+		if contact.ID.Equals(target) {
+			fmt.Println("Found!!!!!!!!!!!!!!!!")
+			return shortlist
+		}
+	}
+
 	closest := *kademlia.RoutingTable.me
 	probed := make(map[string]bool)
+	probed[closest.ID.String()] = true
 	wg := sync.WaitGroup{}
 
 	for {
