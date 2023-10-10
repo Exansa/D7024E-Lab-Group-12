@@ -91,7 +91,7 @@ func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCa
 	network.SendFindContactMessage(target, sender)
 	res := <-network.msgChan
 
-	if res.Type != FOUND_NODE || res.Sender.ID != sender.ID {
+	if res.Type != FOUND_NODE || !res.Sender.ID.Equals(sender.ID) {
 		return ContactCandidates{}, fmt.Errorf("findNode failed")
 	}
 
