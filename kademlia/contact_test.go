@@ -17,7 +17,7 @@ func TestCalcDistance(t *testing.T) {
 	newContact1 := NewContact(newID1, "10.0.0.2")
 	newContact2 := NewContact(newID2, "10.0.0.3")
 	newContact1.CalcDistance(newContact2.ID)
-	if newContact1.distance == nil {
+	if newContact1.Distance == nil {
 		t.Errorf("Distance is nil")
 	} else {
 		fmt.Println("Distance is not nil")

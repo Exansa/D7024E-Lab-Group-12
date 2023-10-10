@@ -85,7 +85,7 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 	contacts := kademlia.RoutingTable.FindClosestContacts(target, 3)
 	shortlist.Append(contacts)
 
-	for _, contact := range shortlist.contacts {
+	for _, contact := range shortlist.Contacts {
 		fmt.Println("Checking contact:", contact.ID.String())
 		if contact.ID.Equals(target) {
 			fmt.Println("Found!!!!!!!!!!!!!!!!")
@@ -102,7 +102,7 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 		lastClosest := closest
 		queue := make(chan ContactCandidates, k)
 
-		for _, contact := range shortlist.contacts {
+		for _, contact := range shortlist.Contacts {
 			// Skip if already probed to prevent dupes
 			if _, ok := probed[contact.ID.String()]; ok {
 				continue
@@ -134,7 +134,7 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 		close(queue)
 		for t := range queue {
 			// Add all new contacts to the shortlist
-			shortlist.Append(t.contacts)
+			shortlist.Append(t.Contacts)
 		}
 
 		// Sort shortlist
@@ -142,11 +142,11 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 
 		// Pick all alpha closest nodes as the new shortlist
 		if shortlist.Len() > alpha {
-			shortlist.contacts = shortlist.GetContacts(alpha)
+			shortlist.Contacts = shortlist.GetContacts(alpha)
 		}
 
 		// Exit the loop if no closer nodes are found
-		closest = shortlist.contacts[0]
+		closest = shortlist.Contacts[0]
 		if closest.ID.Equals(lastClosest.ID) {
 			break
 		}

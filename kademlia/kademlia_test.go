@@ -86,11 +86,12 @@ func TestLookupContact(t *testing.T) {
 	child7 := NewKademlia("127.0.0.1:7998")
 	child7.initNode()
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 
 	res := child6.Network.Kademlia.LookupContact(child1.ID)
+	fmt.Println("===========================================================================")
 	fmt.Println("Found some contacts!")
-	for _, contact := range res.contacts {
+	for _, contact := range res.Contacts {
 		fmt.Println(contact.String())
 		if contact.ID.Equals(child1.ID) {
 			fmt.Println("Found target contact!")
@@ -99,9 +100,9 @@ func TestLookupContact(t *testing.T) {
 	}
 
 	fmt.Println("Did not find target contact")
-	fmt.Printf("Found: %s\n", res.contacts[0].ID)
+	fmt.Printf("Found: %s\n", res.Contacts[0].ID)
 	fmt.Printf("Target: %s\n", child1.ID)
-	fmt.Printf("Full list:%v\n", res.contacts)
+	fmt.Printf("Full list:%v\n", res.Contacts)
 
 	fmt.Println("Root node contacts:")
 	contacts := rootNode.RoutingTable.FindClosestContacts(child1.ID, 3)

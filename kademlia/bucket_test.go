@@ -36,7 +36,7 @@ func TestGetContactAndCalcDistance(t *testing.T) {
 	contactInfo1 := NewContact(newID1, "10.0.0.2")
 	bucket.AddContact(contactInfo1)
 	result := bucket.GetContactAndCalcDistance(newID1)
-	if result[0].distance == nil {
+	if result[0].Distance == nil {
 		t.Errorf("Distance is nil")
 	} else {
 		fmt.Println("Distance is not nil")

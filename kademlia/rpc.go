@@ -2,6 +2,7 @@ package d7024e
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
 )
 
@@ -13,12 +14,12 @@ type RPC struct {
 }
 
 type msgData struct {
-	PING  string
-	STORE []byte
-	HASH  string
-	NODE  KademliaID
-	NODES ContactCandidates
-	VALUE string
+	PING  string            `json:"ping"`  // ping message
+	STORE []byte            `json:"store"` // store message
+	HASH  string            `json:"hash"`  // hash message
+	NODE  KademliaID        `json:"node"`  // node message
+	NODES ContactCandidates `json:"nodes"` // nodes message
+	VALUE string            `json:"value"` // value message
 }
 
 type msgType string
@@ -43,6 +44,9 @@ func sendMessage(msg *RPC) {
 	// Marshall msg
 	jsonMsg, err := json.Marshal(msg)
 	checkError(err)
+
+	fmt.Println("Sending message to", msg.Receiver.Address)
+	fmt.Println("Raw data: ", string(jsonMsg))
 
 	// Send msg
 	_, err = conn.Write(jsonMsg)
@@ -80,12 +84,12 @@ func (network *Network) SendFindContactMessage(target *KademliaID, receiver *Con
 	return ContactCandidates{}, nil
 }
 
-func (network *Network) SendFoundContactMessage(contact ContactCandidates, receiver *Contact) error {
+func (network *Network) SendFoundContactMessage(contacts ContactCandidates, receiver *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = FOUND_NODE
 	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *receiver
-	newMsg.Data.NODES = contact
+	newMsg.Data.NODES = contacts
 	sendMessage(newMsg)
 	return nil
 }
