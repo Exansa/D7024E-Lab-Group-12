@@ -27,7 +27,22 @@ func TestInitNode(t *testing.T) {
 
 	childNode := NewKademlia("localhost:8000", false) //Non-bootstrap route
 	childNode.initNode()
+	time.Sleep(100 * time.Millisecond)
+
 	fmt.Println(childNode.isInitialized())
+	fmt.Println(childNode.isBootstrapNode())
+
+	fmt.Println(rootNode.isInitialized())
+	fmt.Println(rootNode.isBootstrapNode())
+
+	if !childNode.isInitialized() || childNode.isBootstrapNode() {
+		t.Fail()
+	}
+
+	if !rootNode.isInitialized() || !rootNode.isBootstrapNode() {
+		t.Fail()
+	}
+
 }
 
 func TestStoreValue(t *testing.T) {

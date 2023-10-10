@@ -2,17 +2,19 @@ package d7024e
 
 import (
 	"encoding/hex"
+	"fmt"
 	"sync"
 )
 
 const alpha = 3
 const k = 20
+const uninitIDString = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+const bootstrapIDString = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
 
 type Kademlia struct {
 	ID           *KademliaID       //id
 	ADDRESS      string            //ip:port
 	DataStore    map[string][]byte //data storage
-	Bootstrap    bool              //bootstrap eller inte
 	RoutingTable *RoutingTable     //routingtable
 	Network      *Network          //network
 }
@@ -20,38 +22,44 @@ type Kademlia struct {
 func NewKademlia(address string, bootstrap bool) *Kademlia {
 	kademlia := Kademlia{}
 
-	kademlia.ID = nil // Will get set during init
+	kademlia.ID = NewKademliaID(uninitIDString) // Placeholder until init
 	kademlia.ADDRESS = address
 	kademlia.DataStore = make(map[string][]byte)
-	kademlia.Bootstrap = bootstrap           //TODO: Implement logic for bootstrap here
-	kademlia.RoutingTable = nil              // Will get set during init
 	kademlia.Network = NewNetwork(&kademlia) // Will get set during init
+
+	me := NewContact(kademlia.ID, kademlia.ADDRESS)
+	kademlia.RoutingTable = NewRoutingTable(&me)
 
 	return &kademlia
 }
 
 func (kademlia *Kademlia) setNodeID(id *KademliaID) {
 	kademlia.ID = id
-	me := NewContact(id, kademlia.ADDRESS)
-	kademlia.RoutingTable = NewRoutingTable(&me)
 }
 
 // Checks if the node is initialized
 //
 // PANICS if the node is in an inconsistent state
+
+func (kademlia *Kademlia) updateIDParams(id *KademliaID) {
+	kademlia.ID = id
+	me := NewContact(kademlia.ID, kademlia.ADDRESS)
+	kademlia.RoutingTable = NewRoutingTable(&me)
+}
+
 func (kademlia *Kademlia) isInitialized() bool {
-	if kademlia.ID != nil && kademlia.RoutingTable != nil {
-		return true
-	} else if kademlia.ID == nil && kademlia.RoutingTable == nil {
-		return false
-	} else {
-		panic("Kademlia is in an inconsistent state")
-	}
+	uninitID := NewKademliaID(uninitIDString)
+	return !kademlia.ID.Equals(uninitID)
+}
+
+func (kademlia *Kademlia) isBootstrapNode() bool {
+	bootstrapID := NewKademliaID(bootstrapIDString)
+	return kademlia.ID.Equals(bootstrapID)
 }
 
 func (kademlia *Kademlia) initNode() {
 	bootstrapAddress := "localhost:1337"
-	bootstrapID := NewKademliaID("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+	bootstrapID := NewKademliaID(bootstrapIDString)
 
 	// Check if bootstrap node is alive
 	bootstrapContact := NewContact(bootstrapID, bootstrapAddress)
@@ -61,11 +69,12 @@ func (kademlia *Kademlia) initNode() {
 	err := kademlia.Network.ping(&bootstrapContact) //TODO: Add timeout
 	if err == nil {
 		// Bootstrap node is alive and has added you as a contact, init connection
-		kademlia.setNodeID(NewRandomKademliaID())
-		return
+		fmt.Println("Bootstrap node is alive, initializing connection")
+		kademlia.updateIDParams(NewRandomKademliaID())
 	} else {
-		// No response from bootstrap node, set bootstrap node to self
-		kademlia.setNodeID(bootstrapID)
+		// Invalid/No response from bootstrap node, set bootstrap node to self
+		fmt.Println("No response from bootstrap node, setting bootstrap node to self")
+		kademlia.updateIDParams(bootstrapID)
 	}
 }
 

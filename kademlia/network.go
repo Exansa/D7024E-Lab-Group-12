@@ -98,8 +98,12 @@ func (network *Network) findNode(target *KademliaID, sender *Contact) ContactCan
 func (network *Network) ping(contact *Contact) error {
 	//TODO: Add timeout
 
+	fmt.Println("Sending ping to", contact.ID.String())
+
 	network.SendPingMessage(contact)
 	res := <-network.msgChan
+
+	fmt.Println("Received response from", res.Sender.ID.String())
 
 	if res.Type == PONG && res.Sender.ID.Equals(contact.ID) {
 		// Add contact to routing table
