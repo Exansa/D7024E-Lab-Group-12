@@ -103,13 +103,13 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 			//async FIND_NODE RPC to the closest nodes in shortlist
 			go func(contact *Contact) {
 
-				res := kademlia.Network.findNode(target, contact)
+				res, err := kademlia.Network.findNode(target, contact)
 
-				// if err != nil {
-				// 	fmt.Println("Error listening:", err.Error())
-				// 	wg.Done()
-				// 	return // If it fails to reply, it won't be added to the shortlist
-				// }
+				if err != nil {
+					fmt.Println("Error finding node:", err.Error())
+					wg.Done()
+					return // If it fails to reply, it won't be added to the shortlist
+				}
 
 				queue <- res
 				wg.Done()
