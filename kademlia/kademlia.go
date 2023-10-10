@@ -19,7 +19,7 @@ type Kademlia struct {
 	Network      *Network          //network
 }
 
-func NewKademlia(address string, bootstrap bool) *Kademlia {
+func NewKademlia(address string) *Kademlia {
 	kademlia := Kademlia{}
 
 	kademlia.ID = NewKademliaID(uninitIDString) // Placeholder until init

@@ -48,10 +48,10 @@ func TestSendMessage(t *testing.T) {
 
 /*
 func TestPing(t *testing.T) {
-	kademlia := NewKademlia("127.0.0.1:8000", true)
+	kademlia := NewKademlia("127.0.0.1:8000")
 	kademlia.initNode()
 	network := NewNetwork(kademlia)
-	kademlia2 := NewKademlia("127.0.0.1:9998", false)
+	kademlia2 := NewKademlia("127.0.0.1:9998")
 	kademlia2.initNode()
 	network.Listen("127.0.0.1:9998")
 	contact := NewContact(NewRandomKademliaID(), "127.0.0.1:9998")
