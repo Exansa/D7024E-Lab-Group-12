@@ -11,11 +11,11 @@ func TestNetwork(t *testing.T) {
 }
 func TestNetworkPingProcess(t *testing.T) {
 	// Create a network
-	receiver := NewKademlia("127.0.0.1:8000", true)
+	receiver := NewKademlia("127.0.0.1:8000")
 	receiver.setNodeID(NewRandomKademliaID()) // Simple way to init node
 	receiverContact := NewContact(receiver.ID, receiver.ADDRESS)
 
-	sender := NewKademlia("127.0.0.1:8001", false)
+	sender := NewKademlia("127.0.0.1:8001")
 	sender.setNodeID(NewRandomKademliaID())
 
 	// Start listening after messages
@@ -40,11 +40,11 @@ func TestNetworkPingProcess(t *testing.T) {
 
 func TestNetworkPingFunction(t *testing.T) {
 	// Create a network
-	receiver := NewKademlia("127.0.0.1:8002", true)
+	receiver := NewKademlia("127.0.0.1:8002")
 	receiver.setNodeID(NewRandomKademliaID()) // Simple way to init node
 	receiverContact := NewContact(receiver.ID, receiver.ADDRESS)
 
-	sender := NewKademlia("127.0.0.1:8003", false)
+	sender := NewKademlia("127.0.0.1:8003")
 	sender.setNodeID(NewRandomKademliaID())
 
 	// Start listening after messages
