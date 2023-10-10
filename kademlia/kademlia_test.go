@@ -47,7 +47,7 @@ func TestInitNode(t *testing.T) {
 
 func TestUpdateIDParams(t *testing.T) {
 	fmt.Println("TestUpdateIDParams")
-	kademlia := NewKademlia("127.0.0.1:7888", true)
+	kademlia := NewKademlia("127.0.0.1:7888")
 	newID := NewKademliaID(bootstrapIDString)
 	kademlia.updateIDParams(newID)
 	if !kademlia.ID.Equals(newID) {
@@ -57,33 +57,33 @@ func TestUpdateIDParams(t *testing.T) {
 
 func TestLookupContact(t *testing.T) {
 	fmt.Println("TestLookupContact")
-	rootNode := NewKademlia("127.0.0.1:1337", true)
+	rootNode := NewKademlia("127.0.0.1:1337")
 	rootNode.initNode()
 	//wait for root node to be initialized
 	time.Sleep(100 * time.Millisecond)
 
-	child1 := NewKademlia("127.0.0.1:7990", true)
+	child1 := NewKademlia("127.0.0.1:7990")
 	child1.initNode()
 
-	child2 := NewKademlia("127.0.0.1:7992", true)
+	child2 := NewKademlia("127.0.0.1:7992")
 	child2.initNode()
 
-	child3 := NewKademlia("127.0.0.1:7993", true)
+	child3 := NewKademlia("127.0.0.1:7993")
 	child3.initNode()
 
-	child4 := NewKademlia("127.0.0.1:7994", true)
+	child4 := NewKademlia("127.0.0.1:7994")
 	child4.initNode()
 
-	child8 := NewKademlia("127.0.0.1:7995", true)
+	child8 := NewKademlia("127.0.0.1:7995")
 	child8.initNode()
 
-	child5 := NewKademlia("127.0.0.1:7996", true)
+	child5 := NewKademlia("127.0.0.1:7996")
 	child5.initNode()
 
-	child6 := NewKademlia("127.0.0.1:7997", true)
+	child6 := NewKademlia("127.0.0.1:7997")
 	child6.initNode()
 
-	child7 := NewKademlia("127.0.0.1:7998", true)
+	child7 := NewKademlia("127.0.0.1:7998")
 	child7.initNode()
 
 	time.Sleep(100 * time.Millisecond)
@@ -112,33 +112,4 @@ func TestStoreValue(t *testing.T) {
 	dataHash := hashData([]byte("test"))
 	dataKey := hex.EncodeToString(hashData([]byte("test")))
 	kademlia.StoreValue(dataHash, dataKey)
-}
-
-func TestLookupContact(t *testing.T) {
-	fmt.Println("TestLookupContact")
-	kademlia1 := NewKademlia("127.0.0.1:1337")
-	kademlia1.initNode()
-	time.Sleep(100 * time.Millisecond)
-	kademlia2 := NewKademlia("127.0.0.1:1002")
-	kademlia2.initNode()
-	time.Sleep(100 * time.Millisecond)
-	kademlia3 := NewKademlia("127.0.0.1:1003")
-	kademlia3.initNode()
-	time.Sleep(100 * time.Millisecond)
-	kademlia4 := NewKademlia("127.0.0.1:1004")
-	kademlia4.initNode()
-	time.Sleep(100 * time.Millisecond)
-	kademlia5 := NewKademlia("127.0.0.1:1005")
-	kademlia5.initNode()
-	time.Sleep(100 * time.Millisecond)
-	kademlia1.RoutingTable.AddContact(*kademlia2.RoutingTable.me)
-	kademlia1.RoutingTable.AddContact(*kademlia3.RoutingTable.me)
-	kademlia1.RoutingTable.AddContact(*kademlia4.RoutingTable.me)
-	kademlia1.RoutingTable.AddContact(*kademlia5.RoutingTable.me)
-	fmt.Print("added contacts")
-
-	shortlist := kademlia1.LookupContact(kademlia4.ID)
-	if shortlist.contacts[0] != *kademlia4.RoutingTable.me {
-		t.Fail()
-	}
 }
