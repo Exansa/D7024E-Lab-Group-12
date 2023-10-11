@@ -62,11 +62,15 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case STORE:
 		// store data using kademlia func store
-		network.Kademlia.StoreValue(msg.Data.STORE, msg.Data.HASH)
+		network.Kademlia.StoreLocally(msg.Data.STORE, msg.Data.HASH)
+		network.SendStoredMessage(&msg.Sender)
+
+	case STORED:
+		network.msgChan <- *msg
 
 	case FIND_NODE:
 		// send closest nodes using kademlia func lookupcontact
-		contacts := network.Kademlia.LookupContact(&msg.Data.NODE)
+		contacts := network.Kademlia.LookupContact(&msg.Data.NODE, &msg.Sender)
 		network.SendFoundContactMessage(contacts, &msg.Sender)
 
 	case FOUND_NODE:
@@ -99,6 +103,17 @@ func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCa
 	}
 
 	return res.Data.NODES, nil
+}
+
+func (network *Network) storeAtTarget(data []byte, target *Contact) error {
+	network.SendStoreMessage(data, target)
+	res := <-network.msgChan
+
+	if res.Type != STORED || !res.Sender.ID.Equals(target.ID) {
+		return fmt.Errorf("storeValue failed")
+	}
+
+	return nil
 }
 
 func (network *Network) ping(contact *Contact) error {

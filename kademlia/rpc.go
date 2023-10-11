@@ -109,16 +109,21 @@ func (network *Network) SendFoundDataMessage(data string, receiver *Contact) err
 	return nil
 }
 
-func (network *Network) SendStoreMessage(data []byte) error {
+func (network *Network) SendStoreMessage(data []byte, receiver *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = STORE
 	newMsg.Sender = *network.Kademlia.RoutingTable.me
+	newMsg.Receiver = *receiver
 	newMsg.Data.STORE = data
-	self, receiver, dataHash := network.Kademlia.Store(newMsg.Data.STORE)
-	if !self {
-		newMsg.Receiver = receiver
-		newMsg.Data.HASH = dataHash
-		sendMessage(newMsg)
-	}
+	sendMessage(newMsg)
+	return nil
+}
+
+func (network *Network) SendStoredMessage(receiver *Contact) error {
+	newMsg := new(RPC)
+	newMsg.Type = STORED
+	newMsg.Sender = *network.Kademlia.RoutingTable.me
+	newMsg.Receiver = *receiver
+	sendMessage(newMsg)
 	return nil
 }
