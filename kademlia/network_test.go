@@ -10,6 +10,7 @@ func TestNetwork(t *testing.T) {
 	fmt.Println("TestNetwork")
 }
 func TestNetworkPingProcess(t *testing.T) {
+	fmt.Println("TestNetworkPingProcess")
 	// Create a network
 	receiver := NewKademlia("127.0.0.1:6000")
 	receiver.setNodeID(NewRandomKademliaID()) // Simple way to init node
@@ -39,6 +40,7 @@ func TestNetworkPingProcess(t *testing.T) {
 }
 
 func TestNetworkPingFunction(t *testing.T) {
+	fmt.Print("TestNetworkPingFunction")
 	// Create a network
 	receiver := NewKademlia("127.0.0.1:6002")
 	receiver.setNodeID(NewRandomKademliaID()) // Simple way to init node
