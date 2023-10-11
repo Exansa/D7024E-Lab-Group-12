@@ -165,7 +165,7 @@ func TestStoreValue(t *testing.T) {
 
 	time.Sleep(1000 * time.Millisecond)
 
-	err := childNode.Store([]byte("test"))
+	err := child3.Store([]byte("test"))
 
 	time.Sleep(1000 * time.Millisecond)
 

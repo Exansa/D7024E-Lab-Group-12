@@ -80,6 +80,8 @@ func (kademlia *Kademlia) initNode() {
 }
 
 func (kademlia *Kademlia) LookupContact(target *KademliaID, sender *Contact) ContactCandidates {
+	fmt.Println("============== NEW LOOKUP =================")
+	fmt.Println("Target:", target.String(), "Sender:", sender.String())
 
 	shortlist := ContactCandidates{}
 	contacts := kademlia.RoutingTable.FindClosestContacts(target, 3)
@@ -96,13 +98,18 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID, sender *Contact) Con
 	wg := sync.WaitGroup{}
 
 	for {
+		fmt.Println("-----------New loop-----------")
+		fmt.Println("Closest:", closest.String())
+		fmt.Println("Shortlist:", shortlist.Contacts)
 		lastClosest := closest
 		queue := make(chan ContactCandidates, k)
 
 		if probed.Len() < alpha {
 			for _, contact := range shortlist.Contacts {
+				fmt.Println("Probing:", contact.String())
 				// Skip if already probed to prevent dupes
 				if probed.Has(contact.ID) || contact.ID.Equals(sender.ID) {
+					fmt.Println("SKIPPING")
 					continue
 				}
 
@@ -113,6 +120,7 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID, sender *Contact) Con
 				//async FIND_NODE RPC to the closest nodes in shortlist
 				go func(contact *Contact) {
 
+					fmt.Println("Sending FIND_NODE to:", contact.String())
 					res, err := kademlia.Network.findNode(target, contact)
 
 					if err != nil {
@@ -129,9 +137,13 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID, sender *Contact) Con
 			}
 		}
 
+		fmt.Println("Waiting for responses...")
+
 		wg.Wait()
 		// Wait for all responses
 		close(queue)
+		fmt.Println("----------PROBE COMPLETE----------")
+
 		for t := range queue {
 			// Add all new contacts to the shortlist
 			shortlist.Append(t.Contacts)
@@ -151,6 +163,7 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID, sender *Contact) Con
 			break
 		}
 	}
+	fmt.Println("============== END LOOKUP =================")
 	return shortlist
 
 }
