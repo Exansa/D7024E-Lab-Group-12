@@ -59,46 +59,46 @@ func TestLookupContact(t *testing.T) {
 	rootNode := NewKademlia("127.0.0.1:1337")
 	rootNode.initNode()
 	//wait for root node to be initialized
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	child1 := NewKademlia("127.0.0.1:7990")
 	child1.initNode()
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	child2 := NewKademlia("127.0.0.1:7992")
 	child2.initNode()
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	child3 := NewKademlia("127.0.0.1:7993")
 	child3.initNode()
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	child4 := NewKademlia("127.0.0.1:7994")
 	child4.initNode()
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	child8 := NewKademlia("127.0.0.1:7995")
 	child8.initNode()
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	child5 := NewKademlia("127.0.0.1:7996")
 	child5.initNode()
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	child6 := NewKademlia("127.0.0.1:7997")
 	child6.initNode()
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	child7 := NewKademlia("127.0.0.1:7998")
 	child7.initNode()
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 
 	time.Sleep(1 * time.Second)
 
