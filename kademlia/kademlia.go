@@ -85,10 +85,8 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 	contacts := kademlia.RoutingTable.FindClosestContacts(target, 3)
 	shortlist.Append(contacts)
 
-	for _, contact := range shortlist.Contacts {
-		if contact.ID.Equals(target) {
-			return shortlist
-		}
+	if shortlist.Has(target) {
+		return shortlist
 	}
 
 	closest := *kademlia.RoutingTable.me
