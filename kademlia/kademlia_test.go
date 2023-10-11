@@ -102,15 +102,12 @@ func TestLookupContact(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 
-	res := child7.Network.Kademlia.LookupContact(child1.ID)
+	res := child7.Network.Kademlia.LookupContact(child1.ID, child7.RoutingTable.me)
 	fmt.Println("===========================================================================")
 	fmt.Println("Found some contacts!")
-	for _, contact := range res.Contacts {
-		fmt.Println(contact.String())
-		if contact.ID.Equals(child1.ID) {
-			fmt.Println("Found target contact!")
-			return
-		}
+	if res.Has(child1.ID) {
+		fmt.Println("Found target contact")
+		return
 	}
 
 	fmt.Println("Did not find target contact")
@@ -127,11 +124,52 @@ func TestLookupContact(t *testing.T) {
 
 }
 
-// func TestStoreValue(t *testing.T) {
-// 	fmt.Println("TestStore")
-// 	kademlia := NewKademlia("127.0.0.1:9999")
-// 	kademlia.initNode()
-// 	dataHash := hashData([]byte("test"))
-// 	dataKey := hex.EncodeToString(hashData([]byte("test")))
-// 	kademlia.StoreValue(dataHash, dataKey)
-// }
+func TestStoreValue(t *testing.T) {
+	time.Sleep(1000 * time.Millisecond)
+	fmt.Println("TestStore")
+	rootNode := NewKademlia("127.0.0.1:1337")
+	rootNode.initNode()
+	//wait for root node to be initialized
+	time.Sleep(500 * time.Millisecond)
+
+	childNode := NewKademlia("127.0.0.1:7989")
+	childNode.initNode()
+	time.Sleep(500 * time.Millisecond)
+
+	child1 := NewKademlia("127.0.0.1:7990")
+	child1.initNode()
+	time.Sleep(500 * time.Millisecond)
+
+	child2 := NewKademlia("127.0.0.1:7992")
+	child2.initNode()
+
+	time.Sleep(500 * time.Millisecond)
+
+	child3 := NewKademlia("127.0.0.1:7993")
+	child3.initNode()
+
+	time.Sleep(500 * time.Millisecond)
+
+	child4 := NewKademlia("127.0.0.1:7994")
+	child4.initNode()
+
+	time.Sleep(500 * time.Millisecond)
+
+	child8 := NewKademlia("127.0.0.1:7995")
+	child8.initNode()
+
+	time.Sleep(500 * time.Millisecond)
+
+	child5 := NewKademlia("127.0.0.1:7996")
+	child5.initNode()
+
+	time.Sleep(1000 * time.Millisecond)
+
+	err := child3.Store([]byte("test"))
+
+	time.Sleep(1000 * time.Millisecond)
+
+	if err != nil {
+		t.Fail()
+	}
+}

@@ -79,55 +79,71 @@ func (kademlia *Kademlia) initNode() {
 	}
 }
 
-func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
+func (kademlia *Kademlia) LookupContact(target *KademliaID, sender *Contact) ContactCandidates {
+	fmt.Println("============== NEW LOOKUP =================")
+	fmt.Println("Target:", target.String(), "Sender:", sender.String())
 
 	shortlist := ContactCandidates{}
 	contacts := kademlia.RoutingTable.FindClosestContacts(target, 3)
 	shortlist.Append(contacts)
 
-	if shortlist.Has(target) {
+	if shortlist.Has(target) || target.Equals(kademlia.RoutingTable.me.ID) {
 		return shortlist
 	}
 
 	closest := *kademlia.RoutingTable.me
-	probed := make(map[string]bool)
-	probed[closest.ID.String()] = true
+	probed := ContactCandidates{}
+	probed.Append([]Contact{*kademlia.RoutingTable.me})
+
 	wg := sync.WaitGroup{}
 
 	for {
+		fmt.Println("-----------New loop-----------")
+		fmt.Println("Closest:", closest.String())
+		fmt.Println("Shortlist:", shortlist.Contacts)
 		lastClosest := closest
 		queue := make(chan ContactCandidates, k)
 
-		for _, contact := range shortlist.Contacts {
-			// Skip if already probed to prevent dupes
-			if _, ok := probed[contact.ID.String()]; ok {
-				continue
-			}
-			probed[contact.ID.String()] = true
-
-			wg.Add(1)
-
-			//async FIND_NODE RPC to the closest nodes in shortlist
-			go func(contact *Contact) {
-
-				res, err := kademlia.Network.findNode(target, contact)
-
-				if err != nil {
-					fmt.Println("Error finding node:", err.Error())
-					wg.Done()
-					return // If it fails to reply, it won't be added to the shortlist
+		if probed.Len() < alpha {
+			for _, contact := range shortlist.Contacts {
+				fmt.Println("Probing:", contact.String())
+				// Skip if already probed to prevent dupes
+				if probed.Has(contact.ID) || contact.ID.Equals(sender.ID) {
+					fmt.Println("SKIPPING")
+					continue
 				}
 
-				queue <- res
-				wg.Done()
+				probed.Append([]Contact{contact})
 
-			}(&contact)
+				wg.Add(1)
 
+				//async FIND_NODE RPC to the closest nodes in shortlist
+				go func(contact *Contact) {
+
+					fmt.Println("Sending FIND_NODE to:", contact.String())
+					res, err := kademlia.Network.findNode(target, contact)
+
+					if err != nil {
+						fmt.Println("Error finding node:", err.Error())
+						wg.Done()
+						return // If it fails to reply, it won't be added to the shortlist
+					}
+
+					queue <- res
+					wg.Done()
+
+				}(&contact)
+
+			}
 		}
+
+		fmt.Println("Waiting for responses...")
 
 		wg.Wait()
 		// Wait for all responses
 		close(queue)
+		fmt.Println("----------PROBE COMPLETE----------")
+
 		for t := range queue {
 			// Add all new contacts to the shortlist
 			shortlist.Append(t.Contacts)
@@ -143,10 +159,11 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID) ContactCandidates {
 
 		// Exit the loop if no closer nodes are found
 		closest = shortlist.Contacts[0]
-		if closest.ID.Equals(lastClosest.ID) {
+		if closest.ID.Equals(lastClosest.ID) || closest.ID.Equals(kademlia.RoutingTable.me.ID) || shortlist.Has(target) {
 			break
 		}
 	}
+	fmt.Println("============== END LOOKUP =================")
 	return shortlist
 
 }
@@ -162,32 +179,32 @@ func (kademlia *Kademlia) GetData(hash string) (data []byte) {
 	return kademlia.DataStore[hash]
 }
 
-func (kademlia *Kademlia) Store(data []byte) (self bool, closest Contact, dataHash string) {
+func (kademlia *Kademlia) Store(data []byte) error {
 	// get hash of data
 	//dataHash = hex.EncodeToString(sha1.New().Sum(data))
-	dataHash = hex.EncodeToString(hashData(data))
+	dataHash := hex.EncodeToString(hashData(data))
 	dataKey := NewKademliaID(dataHash)
+	fmt.Print("Data hash: ", dataHash, "\n")
 
 	// find closest nodes, Maybe use lookupcontact?
-	contacts := kademlia.RoutingTable.FindClosestContacts(dataKey, 3)
-	closest = contacts[0]
-	// send store message to closest nodes
-	for _, contact := range contacts {
-		if contact.ID.CalcDistance(contact.ID).Less(closest.ID.CalcDistance(contact.ID)) {
-			closest = contact
-		}
-	}
+	shortlist := kademlia.LookupContact(dataKey, kademlia.RoutingTable.me)
+	closest := shortlist.Contacts[0]
+	fmt.Print(closest.ID, "\n")
+
 	if closest.ID.Equals(kademlia.RoutingTable.me.ID) {
-		kademlia.StoreValue(data, dataHash)
-		return true, closest, dataHash
+		fmt.Print("closest is me\n")
+		kademlia.StoreLocally(data, dataHash)
+		return nil
 	} else {
-		return false, closest, dataHash
+		kademlia.Network.storeAtTarget(data, &closest)
+		return nil
 	}
 	//kademlia.Network.SendStoreMessage(data, closest)
 	// store data in datastore
 	// kademlia.DataStore[hash] = data
 }
 
-func (kademlia *Kademlia) StoreValue(data []byte, dataHash string) {
+func (kademlia *Kademlia) StoreLocally(data []byte, dataHash string) {
 	kademlia.DataStore[dataHash] = data
+	fmt.Print("Kademlia address: ", kademlia.ADDRESS, "\n")
 }
