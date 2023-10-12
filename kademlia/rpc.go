@@ -19,6 +19,7 @@ type msgData struct {
 	NODE  KademliaID        `json:"node"`  // node message
 	NODES ContactCandidates `json:"nodes"` // nodes message
 	VALUE string            `json:"value"` // value message
+	ERR   string            `json:"err"`   // error message
 }
 
 type msgType string
@@ -32,6 +33,7 @@ const (
 	FOUND_NODE  msgType = "FOUND_NODE"
 	FIND_VALUE  msgType = "FIND_VALUE"
 	FOUND_VALUE msgType = "FOUND_VALUE"
+	ERR         msgType = "ERR" //Duplicate message
 )
 
 func sendMessage(msg *RPC) {
@@ -126,4 +128,13 @@ func (network *Network) SendStoredMessage(receiver *Contact) error {
 	newMsg.Receiver = *receiver
 	sendMessage(newMsg)
 	return nil
+}
+
+func (network *Network) SendError(receiver *Contact, errStr string) {
+	newMsg := new(RPC)
+	newMsg.Type = ERR
+	newMsg.Sender = *network.Kademlia.RoutingTable.me
+	newMsg.Receiver = *receiver
+	newMsg.Data.ERR = errStr
+	sendMessage(newMsg)
 }

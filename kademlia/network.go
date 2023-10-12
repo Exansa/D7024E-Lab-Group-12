@@ -72,7 +72,8 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 	case FIND_NODE:
 		// send closest nodes using kademlia func lookupcontact
 		if network.lookupBuffer.Has(*msg) {
-			return //TODO: Add some sort of response to prevent locks
+			network.SendError(&msg.Sender, "DUPLICATE")
+			return
 		}
 
 		network.lookupBuffer.Append(*msg)
@@ -98,6 +99,10 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 		network.msgChan <- *msg
 		network.dataChan <- msg.Data.STORE
 
+	case ERR:
+		network.msgChan <- *msg
+		fmt.Println("Error:", msg.Data.ERR)
+
 	default:
 		fmt.Println("Message type not found")
 	}
@@ -106,6 +111,10 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCandidates, error) {
 	network.SendFindContactMessage(target, sender)
 	res := <-network.msgChan
+
+	if res.Type == ERR {
+		return ContactCandidates{}, fmt.Errorf("findNode failed: %s", res.Data.ERR)
+	}
 
 	if res.Type != FOUND_NODE || !res.Sender.ID.Equals(sender.ID) {
 		return ContactCandidates{}, fmt.Errorf("findNode failed")
@@ -160,7 +169,7 @@ func (buffer LookupBuffer) Has(msg RPC) bool {
 			continue
 		}
 
-		if process.Sender == msg.Sender && process.Type == msg.Type && process.Data.NODE == msg.Data.NODE {
+		if process.Sender.ID.Equals(msg.Sender.ID) && process.Data.NODE.Equals(&msg.Data.NODE) {
 			return true
 		}
 	}
