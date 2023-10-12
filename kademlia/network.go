@@ -1,6 +1,7 @@
 package d7024e
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -129,7 +130,8 @@ func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCa
 
 func (network *Network) storeAtTarget(data []byte, target *Contact) error {
 	fmt.Print("Storing at target\n")
-	network.SendStoreMessage(data, target)
+	hash := hex.EncodeToString(hashData(data))
+	network.SendStoreMessage(data, hash, target)
 	res := <-network.msgChan
 
 	if res.Type != STORED || !res.Sender.ID.Equals(target.ID) {

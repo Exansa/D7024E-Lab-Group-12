@@ -170,6 +170,7 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID, sender *Contact) Con
 }
 
 func (kademlia *Kademlia) LookupData(hash []byte) (data []byte) {
+	fmt.Print(hash, "\n")
 	dataHash := hex.EncodeToString(hashData(hash))
 	dataKey := NewKademliaID(dataHash)
 	shortList := kademlia.LookupContact(dataKey, kademlia.RoutingTable.me)
@@ -201,7 +202,7 @@ func (kademlia *Kademlia) GetData(hash string) (data []byte) {
 func (kademlia *Kademlia) Store(data []byte) error {
 	// get hash of data
 	//dataHash = hex.EncodeToString(sha1.New().Sum(data))
-	dataHash := hex.EncodeToString(data)
+	dataHash := hex.EncodeToString(hashData(data))
 	dataKey := NewKademliaID(dataHash)
 	fmt.Print("Data hash: ", dataHash, "\n")
 
