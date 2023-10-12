@@ -222,8 +222,21 @@ func TestFindValue(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
+	result := child5.GetData("a94a8fe5ccb19ba61c4c0873d391e987982fbbd3")
+	fmt.Println("Result ", string(result))
+	res := child5.LookupData([]byte("test"))
+	if string(res) == string([]byte("test")) {
+		fmt.Println("Success")
+	} else {
+		t.Fail()
+	}
 
-	res := child5.LookupData("test")
-	fmt.Println(res)
+}
 
+func TestGetLocalData(t *testing.T) {
+	kademlia := NewKademlia("127.0.0.1:1337")
+	kademlia.initNode()
+	kademlia.StoreLocally([]byte("test"), string(hashData([]byte("test"))))
+	testValue := kademlia.GetData(string(hashData([]byte("test"))))
+	fmt.Print("Test value: ", string(testValue), "\n")
 }
