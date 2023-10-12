@@ -216,7 +216,7 @@ func TestFindValue(t *testing.T) {
 
 	time.Sleep(1000 * time.Millisecond)
 
-	err := child3.Store([]byte("test"))
+	err := child3.Store([]byte("hogaboga"))
 
 	time.Sleep(1000 * time.Millisecond)
 
@@ -224,8 +224,8 @@ func TestFindValue(t *testing.T) {
 		t.Fail()
 	}
 
-	res := child5.LookupData([]byte("test"))
-	if string(res) == string([]byte("test")) {
+	res := child5.LookupData([]byte("hogaboga"))
+	if string(res) == string([]byte("hogaboga")) {
 		fmt.Println("The value: ", string(res), " was found!")
 	} else {
 		t.Fail()
