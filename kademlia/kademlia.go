@@ -168,11 +168,45 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID, sender *Contact) Con
 
 }
 
-func (kademlia *Kademlia) LookupData(hash string) (data string) {
+func (kademlia *Kademlia) LookupData(hash string) (ContactCandidates, []byte) {
 	// similar to lookupcontact
+
+	// TODO: Either this or Store shortlist method
 	encodedData := kademlia.GetData(hash)
+	if encodedData != nil {
+		return ContactCandidates{}, encodedData
+	}
+
+	dataKey := NewKademliaID(hash)
+
+	// find closest nodes, Maybe use lookupcontact?
+	shortlist := kademlia.LookupContact(dataKey, kademlia.RoutingTable.me)
+	prevList := ContactCandidates{}
+
+	for {
+		if prevList.Equals(shortlist) {
+			break
+		}
+
+		for _, contact := range shortlist.Contacts {
+			can, val, err := kademlia.Network.findValue(&hash, &contact)
+
+			if err != nil {
+				fmt.Println("Error finding value:", err.Error())
+				continue
+			}
+
+			if val != nil {
+				return ContactCandidates{}, val
+			}
+
+			prevList = shortlist
+			shortlist = can
+		}
+	}
+
 	//store the value in the closest node that isn't the correct node
-	return string(encodedData)
+	return shortlist, nil
 }
 
 func (kademlia *Kademlia) GetData(hash string) (data []byte) {

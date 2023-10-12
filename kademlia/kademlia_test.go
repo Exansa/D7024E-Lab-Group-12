@@ -1,6 +1,7 @@
 package d7024e
 
 import (
+	"encoding/hex"
 	"fmt"
 	"testing"
 	"time"
@@ -223,7 +224,14 @@ func TestFindValue(t *testing.T) {
 		t.Fail()
 	}
 
-	res := child5.LookupData("test")
-	fmt.Println(res)
+	dataHash := hex.EncodeToString(hashData([]byte("test")))
+	can, val := child5.LookupData(dataHash)
+	fmt.Println(can)
+	fmt.Println(val)
+	valString := hex.EncodeToString(val)
+	fmt.Println(valString == dataHash)
+	if valString != dataHash {
+		t.Fail()
+	}
 
 }

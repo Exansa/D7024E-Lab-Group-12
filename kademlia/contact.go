@@ -81,3 +81,13 @@ func (candidates *ContactCandidates) Has(id *KademliaID) bool {
 	}
 	return false
 }
+
+// Is equal to another list of contacts
+func (candidates *ContactCandidates) Equals(other ContactCandidates) bool {
+	for _, c := range candidates.Contacts {
+		if !other.Has(c.ID) {
+			return false
+		}
+	}
+	return true
+}

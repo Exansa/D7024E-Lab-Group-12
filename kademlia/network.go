@@ -89,9 +89,13 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case FIND_VALUE:
 		// based on hash, find data using kademlia func lookupdata
-		data := network.Kademlia.LookupData(msg.Data.VALUE)
-		if data != "" {
+		can, data := network.Kademlia.LookupData(msg.Data.VALUE)
+		if data != nil {
 			network.SendFoundDataMessage(data, &msg.Sender)
+		} else if can.Len() > 0 {
+			network.SendFoundContactMessage(can, &msg.Sender)
+		} else {
+			network.SendError(&msg.Sender, "NOT_FOUND")
 		}
 
 	case FOUND_VALUE:
@@ -121,6 +125,26 @@ func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCa
 	}
 
 	return res.Data.NODES, nil
+}
+
+func (network *Network) findValue(target *string, sender *Contact) (ContactCandidates, []byte, error) {
+	network.SendFindDataMessage(*target, sender)
+	res := <-network.msgChan
+
+	if !res.Sender.ID.Equals(sender.ID) {
+		return ContactCandidates{}, nil, fmt.Errorf("findValue failed: Sender not equal")
+	}
+
+	switch res.Type {
+	case FOUND_VALUE:
+		return ContactCandidates{}, res.Data.STORE, nil
+	case FOUND_NODE:
+		return res.Data.NODES, nil, nil
+	case ERR:
+		return ContactCandidates{}, nil, fmt.Errorf("findValue failed: %s", res.Data.ERR)
+	}
+
+	return ContactCandidates{}, nil, fmt.Errorf("findValue failed")
 }
 
 func (network *Network) storeAtTarget(data []byte, target *Contact) error {

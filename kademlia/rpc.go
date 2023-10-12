@@ -92,21 +92,22 @@ func (network *Network) SendFoundContactMessage(contacts ContactCandidates, rece
 	return nil
 }
 
-func (network *Network) SendFindDataMessage(hash string) error {
+func (network *Network) SendFindDataMessage(hash string, receiver *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = FIND_NODE
 	newMsg.Sender = *network.Kademlia.RoutingTable.me
+	newMsg.Receiver = *receiver
 	newMsg.Data.VALUE = hash
 	sendMessage(newMsg)
 	return nil
 }
 
-func (network *Network) SendFoundDataMessage(data string, receiver *Contact) error {
+func (network *Network) SendFoundDataMessage(data []byte, receiver *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = FOUND_VALUE
 	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *receiver
-	newMsg.Data.VALUE = string(data)
+	newMsg.Data.STORE = data
 	sendMessage(newMsg)
 	return nil
 }
