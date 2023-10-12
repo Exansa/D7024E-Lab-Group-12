@@ -7,9 +7,10 @@ import (
 )
 
 type Network struct {
-	Kademlia *Kademlia
-	msgChan  chan RPC
-	dataChan chan []byte
+	Kademlia     *Kademlia
+	msgChan      chan RPC
+	dataChan     chan []byte
+	lookupBuffer LookupBuffer
 }
 
 func NewNetwork(kademlia *Kademlia) *Network {
@@ -70,8 +71,16 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case FIND_NODE:
 		// send closest nodes using kademlia func lookupcontact
+		if network.lookupBuffer.Has(*msg) {
+			return //TODO: Add some sort of response to prevent locks
+		}
+
+		network.lookupBuffer.Append(*msg)
+
 		contacts := network.Kademlia.LookupContact(&msg.Data.NODE, &msg.Sender)
 		network.SendFoundContactMessage(contacts, &msg.Sender)
+
+		network.lookupBuffer.Remove(*msg)
 
 	case FOUND_NODE:
 		//TODO:
@@ -127,4 +136,45 @@ func (network *Network) ping(contact *Contact) error {
 	} else {
 		return fmt.Errorf("ping failed")
 	}
+}
+
+type LookupBuffer struct {
+	lookups []RPC
+}
+
+func (buffer *LookupBuffer) Append(msg RPC) {
+	if msg.Type != FIND_NODE {
+		return
+	}
+
+	buffer.lookups = append(buffer.lookups, msg)
+}
+
+func (buffer LookupBuffer) Has(msg RPC) bool {
+	if msg.Type != FIND_NODE {
+		return false
+	}
+
+	for _, process := range buffer.lookups {
+		if process.Type != FIND_NODE {
+			continue
+		}
+
+		if process.Sender == msg.Sender && process.Type == msg.Type && process.Data.NODE == msg.Data.NODE {
+			return true
+		}
+	}
+	return false
+}
+
+func (buffer *LookupBuffer) Remove(msg RPC) {
+	for i, process := range buffer.lookups {
+		if process.Sender == msg.Sender && process.Type == msg.Type && process.Data.NODE == msg.Data.NODE {
+			buffer.lookups = append(buffer.lookups[:i], buffer.lookups[i+1:]...)
+		}
+	}
+}
+
+func (buffer LookupBuffer) Len() int {
+	return len(buffer.lookups)
 }
