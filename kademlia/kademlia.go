@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"sync"
+	"time"
 )
 
 const alpha = 3
@@ -168,15 +169,34 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID, sender *Contact) Con
 
 }
 
-func (kademlia *Kademlia) LookupData(hash string) (data string) {
-	// similar to lookupcontact
-	encodedData := kademlia.GetData(hash)
+func (kademlia *Kademlia) LookupData(hash []byte) (data []byte) {
+	fmt.Print(hash, "\n")
+	dataHash := hex.EncodeToString(hashData(hash))
+	dataKey := NewKademliaID(dataHash)
+	shortList := kademlia.LookupContact(dataKey, kademlia.RoutingTable.me)
+	time.Sleep(1 * time.Second)
+	for _, contact := range shortList.Contacts {
+		if contact.ID.Equals(kademlia.RoutingTable.me.ID) {
+			result := kademlia.GetData(dataHash)
+			return result
+		} else {
+			result, err := kademlia.Network.getAtTarget(dataKey, &contact)
+			if result != nil {
+				return result
+			} else if err != nil {
+				fmt.Println("Error getting data:", err.Error())
+			}
+		}
+	}
+	return nil
 	//store the value in the closest node that isn't the correct node
-	return string(encodedData)
 }
 
 func (kademlia *Kademlia) GetData(hash string) (data []byte) {
-	return kademlia.DataStore[hash]
+	fmt.Print(hash, "\n")
+	result := kademlia.DataStore[hash]
+	fmt.Print(result, "\n")
+	return result
 }
 
 func (kademlia *Kademlia) Store(data []byte) error {
@@ -207,4 +227,5 @@ func (kademlia *Kademlia) Store(data []byte) error {
 func (kademlia *Kademlia) StoreLocally(data []byte, dataHash string) {
 	kademlia.DataStore[dataHash] = data
 	fmt.Print("Kademlia address: ", kademlia.ADDRESS, "\n")
+	fmt.Print("Data stored is: ", kademlia.GetData(dataHash))
 }

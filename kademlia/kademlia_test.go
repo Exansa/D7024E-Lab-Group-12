@@ -1,6 +1,7 @@
 package d7024e
 
 import (
+	"encoding/hex"
 	"fmt"
 	"testing"
 	"time"
@@ -215,7 +216,7 @@ func TestFindValue(t *testing.T) {
 
 	time.Sleep(1000 * time.Millisecond)
 
-	err := child3.Store([]byte("test"))
+	err := child3.Store([]byte("hogaboga"))
 
 	time.Sleep(1000 * time.Millisecond)
 
@@ -223,7 +224,20 @@ func TestFindValue(t *testing.T) {
 		t.Fail()
 	}
 
-	res := child5.LookupData("test")
-	fmt.Println(res)
+	res := child5.LookupData([]byte("hogaboga"))
+	if string(res) == string([]byte("hogaboga")) {
+		fmt.Println("The value: ", string(res), " was found!")
+	} else {
+		t.Fail()
+	}
 
+}
+
+func TestGetLocalData(t *testing.T) {
+	dataHash := hex.EncodeToString(hashData([]byte("test")))
+	kademlia := NewKademlia("127.0.0.1:1337")
+	kademlia.initNode()
+	kademlia.StoreLocally([]byte("test"), dataHash)
+	testValue := kademlia.GetData(hex.EncodeToString(hashData([]byte("test"))))
+	fmt.Print("Test value: ", string(testValue), "\n")
 }

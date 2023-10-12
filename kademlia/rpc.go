@@ -18,7 +18,7 @@ type msgData struct {
 	HASH  string            `json:"hash"`  // hash message
 	NODE  KademliaID        `json:"node"`  // node message
 	NODES ContactCandidates `json:"nodes"` // nodes message
-	VALUE string            `json:"value"` // value message
+	VALUE []byte            `json:"value"` // value message
 	ERR   string            `json:"err"`   // error message
 }
 
@@ -34,6 +34,7 @@ const (
 	FIND_VALUE  msgType = "FIND_VALUE"
 	FOUND_VALUE msgType = "FOUND_VALUE"
 	ERR         msgType = "ERR" //Duplicate message
+	GET         msgType = "GET"
 )
 
 func sendMessage(msg *RPC) {
@@ -92,7 +93,7 @@ func (network *Network) SendFoundContactMessage(contacts ContactCandidates, rece
 	return nil
 }
 
-func (network *Network) SendFindDataMessage(hash string) error {
+func (network *Network) SendFindDataMessage(hash []byte) error {
 	newMsg := new(RPC)
 	newMsg.Type = FIND_NODE
 	newMsg.Sender = *network.Kademlia.RoutingTable.me
@@ -101,22 +102,23 @@ func (network *Network) SendFindDataMessage(hash string) error {
 	return nil
 }
 
-func (network *Network) SendFoundDataMessage(data string, receiver *Contact) error {
+func (network *Network) SendFoundDataMessage(data []byte, receiver *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = FOUND_VALUE
 	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *receiver
-	newMsg.Data.VALUE = string(data)
+	newMsg.Data.VALUE = data
 	sendMessage(newMsg)
 	return nil
 }
 
-func (network *Network) SendStoreMessage(data []byte, receiver *Contact) error {
+func (network *Network) SendStoreMessage(data []byte, hash string, receiver *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = STORE
 	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *receiver
 	newMsg.Data.STORE = data
+	newMsg.Data.HASH = hash
 	sendMessage(newMsg)
 	return nil
 }
@@ -137,4 +139,14 @@ func (network *Network) SendError(receiver *Contact, errStr string) {
 	newMsg.Receiver = *receiver
 	newMsg.Data.ERR = errStr
 	sendMessage(newMsg)
+}
+
+func (network *Network) SendGetMessage(hash *KademliaID, receiver *Contact) error {
+	newMsg := new(RPC)
+	newMsg.Type = GET
+	newMsg.Sender = *network.Kademlia.RoutingTable.me
+	newMsg.Receiver = *receiver
+	newMsg.Data.HASH = hash.String()
+	sendMessage(newMsg)
+	return nil
 }

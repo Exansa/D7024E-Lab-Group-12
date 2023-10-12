@@ -1,6 +1,7 @@
 package d7024e
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -90,7 +91,7 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 	case FIND_VALUE:
 		// based on hash, find data using kademlia func lookupdata
 		data := network.Kademlia.LookupData(msg.Data.VALUE)
-		if data != "" {
+		if data != nil {
 			network.SendFoundDataMessage(data, &msg.Sender)
 		}
 
@@ -102,7 +103,11 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 	case ERR:
 		network.msgChan <- *msg
 		fmt.Println("Error:", msg.Data.ERR)
-
+	case GET:
+		data := network.Kademlia.GetData(msg.Data.HASH)
+		if data != nil {
+			network.SendFoundDataMessage(data, &msg.Sender)
+		}
 	default:
 		fmt.Println("Message type not found")
 	}
@@ -124,7 +129,9 @@ func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCa
 }
 
 func (network *Network) storeAtTarget(data []byte, target *Contact) error {
-	network.SendStoreMessage(data, target)
+	fmt.Print("Storing at target\n")
+	hash := hex.EncodeToString(hashData(data))
+	network.SendStoreMessage(data, hash, target)
 	res := <-network.msgChan
 
 	if res.Type != STORED || !res.Sender.ID.Equals(target.ID) {
@@ -132,6 +139,18 @@ func (network *Network) storeAtTarget(data []byte, target *Contact) error {
 	}
 
 	return nil
+}
+
+func (network *Network) getAtTarget(hash *KademliaID, target *Contact) ([]byte, error) {
+	fmt.Print("Getting at target", target.Address, "\n")
+	network.SendGetMessage(hash, target)
+	res := <-network.msgChan
+
+	if res.Type != FOUND_VALUE || !res.Sender.ID.Equals(target.ID) {
+		return nil, fmt.Errorf("getValue failed")
+	}
+
+	return res.Data.VALUE, nil
 }
 
 func (network *Network) ping(contact *Contact) error {

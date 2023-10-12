@@ -72,7 +72,7 @@ func put(input []string, kademlia *Kademlia) {
 
 func get(input []string, kademlia *Kademlia) {
 	fmt.Printf("Your file was fetched succesfully! \n")
-	err := kademlia.Network.SendFindDataMessage(input[1])
+	err := kademlia.Network.SendFindDataMessage([]byte(input[1]))
 	if err != nil {
 		fmt.Println("The ping was not successful. \n", err)
 	}
