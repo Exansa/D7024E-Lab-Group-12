@@ -53,26 +53,28 @@ func execute(inp []string, exec func([]string, *Kademlia), inpLen int, corrStr s
 func ping(input []string, kademlia *Kademlia) {
 	newID := NewRandomKademliaID()
 	contactInfo := NewContact(newID, input[1])
-	err := kademlia.Network.SendPingMessage(&contactInfo)
+	err := kademlia.Network.ping(&contactInfo)
 	if err != nil {
 		fmt.Println("The ping was not successful. \n", err)
+	} else {
+		fmt.Printf("The ping was successful! \n")
 	}
 }
 
 func put(input []string, kademlia *Kademlia) {
-	fmt.Printf("Your file was uploaded successfully! \n")
-	// err := kademlia.Network.SendStoreMessage([]byte(input[1]))
-	// if err != nil {
-	// 	fmt.Println("your file was not uploaded successfully", err)
-	// } else {
-	// 	fmt.Printf("Your file was uploaded successfully! The id is: \n%s\n", input[1])
-	// }
+	//fmt.Printf("Your file was uploaded successfully! \n")
+	err := kademlia.Store([]byte(input[1]))
+	if err != nil {
+		fmt.Println("your file was not uploaded successfully", err)
+	} else {
+		fmt.Printf("Your file was uploaded successfully! The id is: \n%s\n", input[1])
+	}
 
 }
 
 func get(input []string, kademlia *Kademlia) {
 	fmt.Printf("Your file was fetched succesfully! \n")
-	err := kademlia.Network.SendFindDataMessage([]byte(input[1]))
+	err := kademlia.LookupData([]byte(input[1]))
 	if err != nil {
 		fmt.Println("The ping was not successful. \n", err)
 	}
@@ -82,5 +84,6 @@ func get(input []string, kademlia *Kademlia) {
 
 func exit(input []string, kademlia *Kademlia) {
 	fmt.Printf("Bye, bye little node! \n")
+	kademlia.Network.SendExitMessage(kademlia.RoutingTable.me)
 	//exit node here os.exit(0)
 }

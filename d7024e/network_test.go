@@ -22,6 +22,7 @@ func TestNetworkPingProcess(t *testing.T) {
 	// Start listening after messages
 	go receiver.Network.Listen()
 	go sender.Network.Listen()
+	time.Sleep(100 * time.Millisecond)
 
 	// Send a message to the network
 	sender.Network.SendPingMessage(&receiverContact)
