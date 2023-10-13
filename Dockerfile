@@ -1,12 +1,9 @@
 FROM golang:latest
 RUN mkdir /app
 WORKDIR /app
-
-COPY . .
-RUN yarn install --production
-CMD ["node", "src/index.js"]
-
-EXPOSE 3000
+COPY ./ /app/
+RUN go build -o main .
+RUN chmod +x main
 
 # Add the commands needed to put your compiled go binary in the container and
 # run it when the container starts.

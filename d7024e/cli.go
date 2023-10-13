@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func CLI(stdin io.Reader, kademlia *Kademlia) {
+func kademlia *Kademlia CLI(stdin io.Reader) {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
