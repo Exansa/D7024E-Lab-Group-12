@@ -1,9 +1,4 @@
 FROM golang:latest
-RUN mkdir /app
-WORKDIR /app
-COPY ./ /app/
-RUN go build -o main .
-RUN chmod +x main
 
 # Add the commands needed to put your compiled go binary in the container and
 # run it when the container starts.
@@ -16,3 +11,17 @@ RUN chmod +x main
 # "kadlab", which you do by using the following command:
 #
 # $ docker build . -t kadlab
+# syntax=docker/dockerfile:1
+#FROM golang:1.16-alpine AS build
+#FROM larjim/kademlialab
+WORKDIR /app
+
+COPY d7024e/go.mod d7024e/go.sum ./
+RUN go mod download
+
+COPY *.go ./
+
+RUN go build -o /main.go
+RUN go build -o /D7024E-LAB-GROUP-12
+
+CMD [ "/D7024E-LAB-GROUP-12" ]

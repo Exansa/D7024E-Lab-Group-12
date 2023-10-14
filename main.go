@@ -1,6 +1,7 @@
 package main
 
 import (
+	"d7024e"
 	"log"
 	"net"
 	"os"
@@ -8,7 +9,7 @@ import (
 
 func main() {
 	ip := GetLocalIP()
-	node := NewKademlia(ip.String() + ":8000")
+	node := d7024e.NewKademlia(ip.String() + ":8000")
 	node.initNode()
 	node.CLI(os.Stdin)
 }
