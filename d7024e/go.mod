@@ -1,3 +1,3 @@
-module d7024e-lab-group-12
+module d7024e
 
 go 1.21.0

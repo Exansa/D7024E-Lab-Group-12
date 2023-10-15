@@ -11,7 +11,7 @@ func main() {
 	ip := GetLocalIP()
 	node := d7024e.NewKademlia(ip.String() + ":8000")
 	node.initNode()
-	node.CLI(os.Stdin)
+	d7024e.CLI(os.Stdin, node)
 }
 
 func GetLocalIP() net.IP {
