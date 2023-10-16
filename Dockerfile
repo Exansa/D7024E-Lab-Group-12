@@ -19,9 +19,9 @@ WORKDIR /app
 COPY d7024e/go.mod d7024e/go.sum ./
 RUN go mod download
 
-COPY *.go ./
+COPY /d7024e/*.go ./
 
-RUN go build -o /main.go
+RUN go build -o d7024e/main.go
 RUN go build -o /D7024E-LAB-GROUP-12
 
 CMD [ "/D7024E-LAB-GROUP-12" ]
