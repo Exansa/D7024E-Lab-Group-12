@@ -14,14 +14,17 @@ FROM golang:latest
 # syntax=docker/dockerfile:1
 #FROM golang:1.16-alpine AS build
 #FROM larjim/kademlialab
-WORKDIR /app
+RUN mkdir /kad
+ADD . /kad
+WORKDIR /kad
 
 COPY d7024e/go.mod d7024e/go.sum ./
-RUN go mod download
-
 COPY /d7024e/*.go ./
 
-RUN go build -o d7024e/main.go
-RUN go build -o /D7024E-LAB-GROUP-12
+RUN go mod download
 
-CMD [ "/D7024E-LAB-GROUP-12" ]
+RUN go build -o d7024e/main.go
+RUN adduser --disabled-password --gecos '' kadusr
+USER kadusr
+
+CMD [ "/bin/bash" ]
