@@ -230,7 +230,7 @@ func (kademlia *Kademlia) Store(data []byte) error {
 		kademlia.StoreLocally(data, dataHash)
 		return nil
 	} else {
-		kademlia.Network.storeAtTarget(data, &closest)
+		kademlia.Network.storeAtTarget(data, dataHash, &closest)
 		return nil
 	}
 	//kademlia.Network.SendStoreMessage(data, closest)

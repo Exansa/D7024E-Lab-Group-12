@@ -147,8 +147,8 @@ func (network *Network) findValue(target *string, sender *Contact) (ContactCandi
 	return ContactCandidates{}, nil, fmt.Errorf("findValue failed")
 }
 
-func (network *Network) storeAtTarget(data []byte, target *Contact) error {
-	network.SendStoreMessage(data, target)
+func (network *Network) storeAtTarget(data []byte, hash string, target *Contact) error {
+	network.SendStoreMessage(data, hash, target)
 	res := <-network.msgChan
 
 	if res.Type != STORED || !res.Sender.ID.Equals(target.ID) {

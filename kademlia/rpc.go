@@ -112,12 +112,13 @@ func (network *Network) SendFoundDataMessage(data []byte, receiver *Contact) err
 	return nil
 }
 
-func (network *Network) SendStoreMessage(data []byte, receiver *Contact) error {
+func (network *Network) SendStoreMessage(data []byte, hash string, receiver *Contact) error {
 	newMsg := new(RPC)
 	newMsg.Type = STORE
 	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *receiver
 	newMsg.Data.STORE = data
+	newMsg.Data.HASH = hash
 	sendMessage(newMsg)
 	return nil
 }

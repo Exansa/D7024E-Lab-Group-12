@@ -229,9 +229,23 @@ func TestFindValue(t *testing.T) {
 	fmt.Println(can)
 	fmt.Println(val)
 	valString := hex.EncodeToString(val)
+	fmt.Println(valString)
+	fmt.Println(dataHash)
 	fmt.Println(valString == dataHash)
 	if valString != dataHash {
 		t.Fail()
 	}
 
+}
+
+func TestStore(t *testing.T) {
+	fmt.Println("TestStore")
+	node := NewKademlia("123")
+	storeVal := []byte("test")
+	node.StoreLocally(storeVal, "test")
+
+	val := node.GetData("test")
+	if val == nil {
+		t.Fail()
+	}
 }
