@@ -1,12 +1,4 @@
 FROM golang:latest
-RUN mkdir /app
-WORKDIR /app
-
-COPY . .
-RUN yarn install --production
-CMD ["node", "src/index.js"]
-
-EXPOSE 3000
 
 # Add the commands needed to put your compiled go binary in the container and
 # run it when the container starts.
@@ -19,3 +11,20 @@ EXPOSE 3000
 # "kadlab", which you do by using the following command:
 #
 # $ docker build . -t kadlab
+# syntax=docker/dockerfile:1
+#FROM golang:1.16-alpine AS build
+#FROM larjim/kademlialab
+RUN mkdir /kad
+ADD . /kad
+WORKDIR /kad
+
+COPY d7024e/go.mod d7024e/go.sum ./
+COPY /d7024e/*.go ./
+
+RUN go mod download
+
+RUN go build -o d7024e/main.go
+RUN adduser --disabled-password --gecos '' kadusr
+USER kadusr
+
+CMD [ "/bin/bash" ]

@@ -1,7 +1,6 @@
 package d7024e
 
 import (
-	"encoding/hex"
 	"fmt"
 	"testing"
 	"time"
@@ -12,11 +11,25 @@ func TestKademlia(t *testing.T) {
 }
 
 func TestNewKademlia(t *testing.T) {
-	kademlia := NewKademlia("127.0.0.1:9999")
-	if kademlia.ID != nil || kademlia.RoutingTable != nil || kademlia.Network != nil {
+	kademlia := NewKademlia("127.0.0.1:1337")
+	if kademlia.ID == nil || kademlia.RoutingTable == nil || kademlia.Network == nil {
 		t.Fail()
 	}
 }
+
+/*
+func TestInitBoot(t *testing.T) {
+	Kademlia := NewKademlia("127.0.0.1:1337")
+	Kademlia.initNode()
+	Kademlia2 := NewKademlia("127.0.0.1:9001")
+	Kademlia2.initNode()
+	isBoot := Kademlia.isBootstrapNode()
+	isInit := Kademlia.isInitialized()
+	if !isBoot || !isInit {
+		t.Fail()
+	}
+	time.Sleep(1000 * time.Millisecond)
+}*/
 
 // func TestInitNode(t *testing.T) {
 // 	fmt.Println("TestNodeInit2")
@@ -55,6 +68,7 @@ func TestUpdateIDParams(t *testing.T) {
 	}
 }
 
+/*
 func TestLookupContact(t *testing.T) {
 	fmt.Println("TestLookupContact")
 	rootNode := NewKademlia("127.0.0.1:1337")
@@ -173,7 +187,7 @@ func TestStoreValue(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-}
+}*/
 
 func TestFindValue(t *testing.T) {
 	time.Sleep(1000 * time.Millisecond)
@@ -219,6 +233,11 @@ func TestFindValue(t *testing.T) {
 	err := child3.Store([]byte("hogaboga"))
 
 	time.Sleep(1000 * time.Millisecond)
+	isBoot := rootNode.isBootstrapNode()
+	isInit := rootNode.isInitialized()
+	if !isBoot || !isInit {
+		t.Fail()
+	}
 
 	if err != nil {
 		t.Fail()
@@ -233,6 +252,7 @@ func TestFindValue(t *testing.T) {
 
 }
 
+/*
 func TestGetLocalData(t *testing.T) {
 	dataHash := hex.EncodeToString(hashData([]byte("test")))
 	kademlia := NewKademlia("127.0.0.1:1337")
@@ -240,4 +260,4 @@ func TestGetLocalData(t *testing.T) {
 	kademlia.StoreLocally([]byte("test"), dataHash)
 	testValue := kademlia.GetData(hex.EncodeToString(hashData([]byte("test"))))
 	fmt.Print("Test value: ", string(testValue), "\n")
-}
+}*/

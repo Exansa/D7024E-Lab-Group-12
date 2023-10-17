@@ -35,6 +35,7 @@ const (
 	FOUND_VALUE msgType = "FOUND_VALUE"
 	ERR         msgType = "ERR" //Duplicate message
 	GET         msgType = "GET"
+	EXIT        msgType = "EXIT"
 )
 
 func sendMessage(msg *RPC) {
@@ -147,6 +148,15 @@ func (network *Network) SendGetMessage(hash *KademliaID, receiver *Contact) erro
 	newMsg.Sender = *network.Kademlia.RoutingTable.me
 	newMsg.Receiver = *receiver
 	newMsg.Data.HASH = hash.String()
+	sendMessage(newMsg)
+	return nil
+}
+
+func (network *Network) SendExitMessage(receiver *Contact) error {
+	newMsg := new(RPC)
+	newMsg.Type = EXIT
+	newMsg.Sender = *network.Kademlia.RoutingTable.me
+	newMsg.Receiver = *receiver
 	sendMessage(newMsg)
 	return nil
 }
