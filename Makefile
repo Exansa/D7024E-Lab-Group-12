@@ -7,11 +7,15 @@ run:
 	docker swarm init
 	docker stack deploy -c docker-compose.yml kadswarm
 
-detach:
+stop:
 	docker stack rm kadswarm
 	docker swarm leave --force
 
 reload:
-	make detach
+	make stop
+	make build
+	make run
+
+start:
 	make build
 	make run

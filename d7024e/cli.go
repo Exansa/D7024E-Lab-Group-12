@@ -25,11 +25,15 @@ func CLI(stdin io.Reader, kademlia *Kademlia) {
 		if len(fieldedInput) > 0 {
 			switch fieldedInput[0] {
 			case "ping":
-				execute(fieldedInput, ping, 1, "ping [node address]", kademlia)
+				execute(fieldedInput, ping, 2, "ping [node address]", kademlia)
 			case "put":
 				execute(fieldedInput, put, 2, "put [file]", kademlia)
 			case "get":
 				execute(fieldedInput, get, 2, "get [hash]", kademlia)
+			case "ip":
+				fmt.Printf("Your ip is: %s\n", kademlia.ADDRESS)
+			case "id":
+				fmt.Printf("Your id is: %s\n", kademlia.ID)
 			case "exit":
 				execute(fieldedInput, exit, 1, "exit", kademlia)
 			case "help":
