@@ -27,4 +27,5 @@ RUN go build -o d7024e/main.go
 RUN adduser --disabled-password --gecos '' kadusr
 USER kadusr
 
-CMD [ "/bin/bash" ]
+#ENTRYPOINT [ "/bin/bash" ]
+CMD [ "go", "run", "main" ]

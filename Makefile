@@ -10,3 +10,8 @@ run:
 detach:
 	docker stack rm kadswarm
 	docker swarm leave --force
+
+reload:
+	make detach
+	make build
+	make run
