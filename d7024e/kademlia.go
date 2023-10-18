@@ -59,7 +59,7 @@ func (kademlia *Kademlia) isBootstrapNode() bool {
 }
 
 func (kademlia *Kademlia) initNode() {
-	bootstrapAddress := "172.18.0.3:8000"
+	bootstrapAddress := "10.0.8.3:8000"
 	bootstrapID := NewKademliaID(bootstrapIDString)
 
 	kademlia.updateIDParams(NewRandomKademliaID())

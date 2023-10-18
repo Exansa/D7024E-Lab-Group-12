@@ -160,12 +160,16 @@ func (network *Network) getAtTarget(hash *KademliaID, target *Contact) ([]byte, 
 func (network *Network) ping(contact *Contact) error {
 	//TODO: Add timeout
 
+	fmt.Printf("Pinging %s\n", contact.Address)
 	network.SendPingMessage(contact)
+	fmt.Printf("Sent ping to %s\n", contact.Address)
 	res := <-network.msgChan
+	fmt.Printf("Received pong from %s\n", contact.Address)
 
 	if res.Type == PONG && res.Sender.ID.Equals(contact.ID) {
 		return nil
 	} else {
+		fmt.Printf("Ping failed!\n")
 		return fmt.Errorf("ping failed")
 	}
 }

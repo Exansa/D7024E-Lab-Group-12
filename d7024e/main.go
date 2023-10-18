@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	ip := GetLocalIP()
-	node := NewKademlia(ip.String() + ":8000")
+	ip := GetSwarmIP()
+	node := NewKademlia(ip + ":8000")
 	go node.initNode()
 	CLI(os.Stdin, node)
 }
@@ -23,4 +23,22 @@ func GetLocalIP() net.IP {
 	localAddress := conn.LocalAddr().(*net.UDPAddr)
 
 	return localAddress.IP
+}
+
+// Get the local IP address for the swarm service
+func GetSwarmIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String()
+			}
+		}
+	}
+
+	return ""
 }

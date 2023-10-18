@@ -27,15 +27,15 @@ services:
 
   kademliaNodes:
     image: kadlab:latest # Make sure your Docker image has this name.
-    ports:
-      - 8000:8000
-    depends_on:
-      - kademliaBootNodes
+    # ports:
+    #   - 7000:7000
+    # depends_on:
+    #   - kademliaBootNodes
     stdin_open: true
     tty: true
     deploy:
       mode: replicated
-      replicas: 5
+      replicas: 3
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -49,4 +49,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: 10.5.0.0/24
+        - subnet: 10.0.8.0/24

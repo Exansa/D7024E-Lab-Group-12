@@ -34,6 +34,15 @@ func CLI(stdin io.Reader, kademlia *Kademlia) {
 				fmt.Printf("Your ip is: %s\n", kademlia.ADDRESS)
 			case "id":
 				fmt.Printf("Your id is: %s\n", kademlia.ID)
+			case "awaitmsg":
+				fmt.Printf("Awaiting message\n")
+				res := <-kademlia.Network.msgChan
+				fmt.Printf("Message received from %s with type %s\n", res.Sender.Address, res.Type)
+			case "sendmsg":
+				fmt.Printf("Sending message\n")
+				contact := NewContact(NewKademliaID(bootstrapIDString), fieldedInput[1])
+				kademlia.Network.SendError(&contact, "test error")
+				fmt.Printf("Message sent\n")
 			case "exit":
 				execute(fieldedInput, exit, 1, "exit", kademlia)
 			case "help":
@@ -55,7 +64,7 @@ func execute(inp []string, exec func([]string, *Kademlia), inpLen int, corrStr s
 }
 
 func ping(input []string, kademlia *Kademlia) {
-	newID := NewRandomKademliaID()
+	newID := NewKademliaID(bootstrapIDString)
 	contactInfo := NewContact(newID, input[1])
 	err := kademlia.Network.ping(&contactInfo)
 	if err != nil {
