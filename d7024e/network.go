@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"time"
 )
 
 type Network struct {
@@ -160,18 +161,27 @@ func (network *Network) getAtTarget(hash *KademliaID, target *Contact) ([]byte, 
 func (network *Network) ping(contact *Contact) error {
 	//TODO: Add timeout
 
-	fmt.Printf("Pinging %s\n", contact.Address)
-	network.SendPingMessage(contact)
-	fmt.Printf("Sent ping to %s\n", contact.Address)
-	res := <-network.msgChan
-	fmt.Printf("Received pong from %s\n", contact.Address)
+	// Timeout after 5 seconds
+	for i := 0; i < 10; i++ {
+		fmt.Printf("Pinging %s\n", contact.Address)
+		network.SendPingMessage(contact)
+		fmt.Printf("Sent ping to %s\n", contact.Address)
 
-	if res.Type == PONG && res.Sender.ID.Equals(contact.ID) {
-		return nil
-	} else {
-		fmt.Printf("Ping failed!\n")
-		return fmt.Errorf("ping failed")
+		select {
+		case res := <-network.msgChan:
+			if res.Type == PONG && res.Sender.ID.Equals(contact.ID) {
+				return nil
+			} else {
+				fmt.Printf("Ping failed!\n")
+				return fmt.Errorf("ping failed")
+			}
+		case <-time.After(1 * time.Second):
+			fmt.Printf("Ping timed out!\n")
+			continue
+		}
 	}
+
+	return fmt.Errorf("host unreachable")
 }
 
 type LookupBuffer struct {
