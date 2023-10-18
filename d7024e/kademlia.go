@@ -60,7 +60,6 @@ func (kademlia *Kademlia) isBootstrapNode() bool {
 
 func (kademlia *Kademlia) initNode() {
 	bootstrapAddress := "10.0.8.3:8000"
-	//bootstrapAddress := "127.0.0.1:1337"
 	bootstrapID := NewKademliaID(bootstrapIDString)
 
 	kademlia.updateIDParams(NewRandomKademliaID())
@@ -87,7 +86,6 @@ func (kademlia *Kademlia) LookupContact(target *KademliaID, sender *Contact) Con
 
 	shortlist := ContactCandidates{}
 	contacts := kademlia.RoutingTable.FindClosestContacts(target, 3)
-	fmt.Println("Closest contacts:", contacts)
 	shortlist.Append(contacts)
 
 	if shortlist.Has(target) || target.Equals(kademlia.RoutingTable.me.ID) {
