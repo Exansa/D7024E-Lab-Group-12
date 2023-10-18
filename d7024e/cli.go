@@ -97,6 +97,5 @@ func get(input []string, kademlia *Kademlia) {
 
 func exit(input []string, kademlia *Kademlia) {
 	fmt.Printf("Bye, bye little node! \n")
-	kademlia.Network.SendExitMessage(kademlia.RoutingTable.me)
-	//exit node here os.exit(0)
+	os.Exit(0)
 }
