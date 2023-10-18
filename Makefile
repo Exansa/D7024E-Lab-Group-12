@@ -21,4 +21,5 @@ start:
 	make run
 
 test:
-	go test
+	$(MAKE) -C d7024e test
+	
