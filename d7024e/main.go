@@ -13,18 +13,6 @@ func main() {
 	CLI(os.Stdin, node)
 }
 
-func GetLocalIP() net.IP {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer conn.Close()
-
-	localAddress := conn.LocalAddr().(*net.UDPAddr)
-
-	return localAddress.IP
-}
-
 // Get the local IP address for the swarm service
 func GetSwarmIP() string {
 	addrs, err := net.InterfaceAddrs()
