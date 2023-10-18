@@ -48,8 +48,6 @@ func (network *Network) Listen() {
 }
 
 func (network *Network) handleRequest(msg *RPC) { // Server side
-	fmt.Println("Handling request from", msg.Sender.Address)
-	fmt.Println("Message type:", msg.Type)
 
 	// Add contact
 	network.Kademlia.RoutingTable.AddContact(msg.Sender)
@@ -103,7 +101,6 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case ERR:
 		network.msgBuffer <- *msg
-		fmt.Println("Error:", msg.Data.ERR)
 	case GET:
 		data := network.Kademlia.GetData(msg.Data.HASH)
 		if data != nil {
@@ -119,8 +116,6 @@ func (network *Network) awaitAndValidate(mt msgType, sender *KademliaID, timeout
 		select {
 		case res := <-network.msgBuffer:
 			if (res.Type != mt && res.Type != ERR) || !res.Sender.ID.Equals(sender) {
-				fmt.Printf("Unexpected response from %s, requeuing \n", res.Sender.Address)
-				fmt.Printf("Expected: %s, got: %s\n", mt, res.Type)
 				network.msgBuffer <- res
 			} else {
 				return res, nil
@@ -154,7 +149,6 @@ func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCa
 }
 
 func (network *Network) storeAtTarget(data []byte, target *Contact) error {
-	fmt.Print("Storing at target\n")
 	hash := hex.EncodeToString(hashData(data))
 	network.SendStoreMessage(data, hash, target)
 	res, err := network.awaitAndValidate(STORED, target.ID, 5)
@@ -172,7 +166,6 @@ func (network *Network) storeAtTarget(data []byte, target *Contact) error {
 }
 
 func (network *Network) getAtTarget(hash *KademliaID, target *Contact) ([]byte, error) {
-	fmt.Print("Getting at target", target.Address, "\n")
 	network.SendGetMessage(hash, target)
 	res, err := network.awaitAndValidate(FOUND_VALUE, target.ID, 5)
 
@@ -192,21 +185,17 @@ func (network *Network) ping(timeout int, contact *Contact) error {
 
 	// Timeout after n retries
 	for i := 0; i < timeout; i++ {
-		fmt.Printf("Pinging %s\n", contact.Address)
 		network.SendPingMessage(contact)
-		fmt.Printf("Sent ping to %s\n", contact.Address)
 
 		select {
 		case res := <-network.msgBuffer:
 			if res.Type == PONG && res.Sender.ID.Equals(contact.ID) {
 				return nil
 			} else {
-				fmt.Printf("Ping failed due to raise cond!\n")
 				network.msgBuffer <- res
 				continue
 			}
 		case <-time.After(1 * time.Second):
-			fmt.Printf("Ping timed out!\n")
 			continue
 		}
 	}
