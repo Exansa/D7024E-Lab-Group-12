@@ -43,10 +43,6 @@ func (network *Network) Listen() {
 		err = json.Unmarshal(buf[:n], &msg)
 		checkError(err)
 
-		if msg.Type == EXIT {
-			return
-		}
-
 		go network.handleRequest(&msg)
 	}
 }
