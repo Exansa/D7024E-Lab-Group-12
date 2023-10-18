@@ -15,6 +15,7 @@ func TestNewKademlia(t *testing.T) {
 	if kademlia.ID == nil || kademlia.RoutingTable == nil || kademlia.Network == nil {
 		t.Fail()
 	}
+	kademlia.StoreLocally([]byte("test"), "test")
 }
 
 /*
