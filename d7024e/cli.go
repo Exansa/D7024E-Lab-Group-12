@@ -34,15 +34,13 @@ func CLI(stdin io.Reader, kademlia *Kademlia) {
 				fmt.Printf("Your ip is: %s\n", kademlia.ADDRESS)
 			case "id":
 				fmt.Printf("Your id is: %s\n", kademlia.ID)
-			case "awaitmsg":
-				fmt.Printf("Awaiting message\n")
-				res := <-kademlia.Network.msgChan
-				fmt.Printf("Message received from %s with type %s\n", res.Sender.Address, res.Type)
-			case "sendmsg":
-				fmt.Printf("Sending message\n")
-				contact := NewContact(NewKademliaID(bootstrapIDString), fieldedInput[1])
-				kademlia.Network.SendError(&contact, "test error")
-				fmt.Printf("Message sent\n")
+			case "info":
+				fmt.Println("--------------------NODE INFO---------------------")
+				fmt.Printf("ID: %s\n", kademlia.ID)
+				fmt.Printf("IP: %s\n", kademlia.ADDRESS)
+				fmt.Printf("Bucket size: %d\n", len(kademlia.RoutingTable.buckets))
+				fmt.Printf("Datastore size: %d\n", len(kademlia.DataStore))
+				fmt.Println("--------------------------------------------------")
 			case "exit":
 				execute(fieldedInput, exit, 1, "exit", kademlia)
 			case "help":
