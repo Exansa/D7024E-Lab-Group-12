@@ -1,4 +1,4 @@
-package d7024e
+package main
 
 import (
 	"encoding/hex"
@@ -59,8 +59,8 @@ func (kademlia *Kademlia) isBootstrapNode() bool {
 }
 
 func (kademlia *Kademlia) initNode() {
-	//bootstrapAddress := "10.0.8.3:8000"
-	bootstrapAddress := "127.0.0.1:1337"
+	bootstrapAddress := "10.0.8.3:8000"
+	//bootstrapAddress := "127.0.0.1:1337"
 	bootstrapID := NewKademliaID(bootstrapIDString)
 
 	kademlia.updateIDParams(NewRandomKademliaID())
