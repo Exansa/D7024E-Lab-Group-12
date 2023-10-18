@@ -125,6 +125,8 @@ func (network *Network) awaitAndValidate(mt msgType, sender *KademliaID, timeout
 		}
 	}
 
+	network.msgBuffer = make(chan RPC, 100)
+
 	return RPC{}, fmt.Errorf("too many tries waiting on response from %s", sender)
 }
 
