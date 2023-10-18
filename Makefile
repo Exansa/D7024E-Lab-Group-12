@@ -19,3 +19,6 @@ reload:
 start:
 	make build
 	make run
+
+test:
+	go test

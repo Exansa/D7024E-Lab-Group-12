@@ -1,4 +1,4 @@
-package main
+package d7024e
 
 import (
 	"encoding/hex"
@@ -171,7 +171,7 @@ func (network *Network) ping(contact *Contact) error {
 				fmt.Printf("Ping failed!\n")
 				return fmt.Errorf("ping failed")
 			}
-		case <-time.After(1 * time.Second):
+		case <-time.After(200 * time.Millisecond):
 			fmt.Printf("Ping timed out!\n")
 			continue
 		}

@@ -1,4 +1,4 @@
-package main
+package d7024e
 
 // var buf bytes.Buffer
 
