@@ -57,3 +57,16 @@ func TestNetworkPingFunction(t *testing.T) {
 	// Send a message to the network
 	sender.Network.ping(5, &receiverContact) // <- Fails or gets stuck if the message is not handled
 }
+
+// func TestLookupBuffer(t *testing.T) {
+// 	fmt.Println("TestLookupBuffer")
+// 	// Create a buffer and fill it with 10 rpcs
+// 	buffer := LookupBuffer{}
+// 	for i := 0; i < 10; i++ {
+// 		rpc := RPC{}
+// 		rpc.Sender = NewContact(NewRandomKademliaID(), "")
+// 		rpc.Type = FIND_NODE
+
+// 		buffer.Append(NewRandomKademliaID())
+// 	}
+// }

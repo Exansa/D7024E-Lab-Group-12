@@ -192,15 +192,7 @@ func (buffer *LookupBuffer) Append(msg RPC) {
 }
 
 func (buffer LookupBuffer) Has(msg RPC) bool {
-	if msg.Type != FIND_NODE {
-		return false
-	}
-
 	for _, process := range buffer.lookups {
-		if process.Type != FIND_NODE {
-			continue
-		}
-
 		if process.Sender.ID.Equals(msg.Sender.ID) && process.Data.NODE.Equals(&msg.Data.NODE) {
 			return true
 		}
@@ -210,8 +202,9 @@ func (buffer LookupBuffer) Has(msg RPC) bool {
 
 func (buffer *LookupBuffer) Remove(msg RPC) {
 	for i, process := range buffer.lookups {
-		if process.Sender == msg.Sender && process.Type == msg.Type && process.Data.NODE == msg.Data.NODE {
-			buffer.lookups = append(buffer.lookups[:i], buffer.lookups[i+1:]...)
+		if process.Sender.ID.Equals(msg.Sender.ID) && process.Data.NODE.Equals(&msg.Data.NODE) {
+			buffer.lookups[i] = buffer.lookups[buffer.Len()-1] // Replace index with last elem
+			buffer.lookups = buffer.lookups[:buffer.Len()-1]   // Truncate slice
 		}
 	}
 }
