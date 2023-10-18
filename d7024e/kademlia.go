@@ -58,9 +58,15 @@ func (kademlia *Kademlia) isBootstrapNode() bool {
 	return kademlia.ID.Equals(bootstrapID)
 }
 
-func (kademlia *Kademlia) initNode() {
+func (kademlia *Kademlia) initNode() error {
 	bootstrapAddress := "10.0.8.3:8000"
 	bootstrapID := NewKademliaID(bootstrapIDString)
+
+	if kademlia.ADDRESS == bootstrapAddress {
+		kademlia.updateIDParams(bootstrapID)
+		go kademlia.Network.Listen()
+		return nil
+	}
 
 	kademlia.updateIDParams(NewRandomKademliaID())
 
@@ -69,14 +75,15 @@ func (kademlia *Kademlia) initNode() {
 	go kademlia.Network.Listen()
 
 	// Try manually pinging the bootstrap node
-	err := kademlia.Network.ping(&bootstrapContact) //TODO: Add timeout
+	err := kademlia.Network.ping(300, &bootstrapContact) //TODO: Add timeout
 	if err == nil {
 		// Bootstrap node is alive and has added you as a contact, init connection
 		fmt.Println("Bootstrap node is alive, initializing connection")
+		return nil
 	} else {
 		// Invalid/No response from bootstrap node, set bootstrap node to self
-		fmt.Println("No response from bootstrap node, setting bootstrap node to self")
-		kademlia.updateIDParams(bootstrapID)
+		fmt.Println("Failed to attach to bootstrap node")
+		return err
 	}
 }
 

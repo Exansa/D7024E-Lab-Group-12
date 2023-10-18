@@ -55,5 +55,5 @@ func TestNetworkPingFunction(t *testing.T) {
 	go sender.Network.Listen()
 
 	// Send a message to the network
-	sender.Network.ping(&receiverContact) // <- Fails or gets stuck if the message is not handled
+	sender.Network.ping(5, &receiverContact) // <- Fails or gets stuck if the message is not handled
 }

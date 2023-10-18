@@ -66,7 +66,7 @@ func execute(inp []string, exec func([]string, *Kademlia), inpLen int, corrStr s
 func ping(input []string, kademlia *Kademlia) {
 	newID := NewKademliaID(bootstrapIDString)
 	contactInfo := NewContact(newID, input[1])
-	err := kademlia.Network.ping(&contactInfo)
+	err := kademlia.Network.ping(5, &contactInfo)
 	if err != nil {
 		fmt.Println("The ping was not successful. \n", err)
 	} else {

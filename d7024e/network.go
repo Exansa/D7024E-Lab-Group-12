@@ -154,11 +154,10 @@ func (network *Network) getAtTarget(hash *KademliaID, target *Contact) ([]byte, 
 	return res.Data.VALUE, nil
 }
 
-func (network *Network) ping(contact *Contact) error {
-	//TODO: Add timeout
+func (network *Network) ping(timeout int, contact *Contact) error {
 
-	// Timeout after 5 seconds
-	for i := 0; i < 10; i++ {
+	// Timeout after n retries
+	for i := 0; i < timeout; i++ {
 		fmt.Printf("Pinging %s\n", contact.Address)
 		network.SendPingMessage(contact)
 		fmt.Printf("Sent ping to %s\n", contact.Address)
@@ -169,7 +168,7 @@ func (network *Network) ping(contact *Contact) error {
 				return nil
 			} else {
 				fmt.Printf("Ping failed!\n")
-				return fmt.Errorf("ping failed")
+				continue
 			}
 		case <-time.After(1 * time.Second):
 			fmt.Printf("Ping timed out!\n")

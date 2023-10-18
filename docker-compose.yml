@@ -33,7 +33,7 @@ services:
     tty: true
     deploy:
       mode: replicated
-      replicas: 16
+      replicas: 60
       restart_policy:
         condition: on-failure
         delay: 5s
