@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"sync"
-	"time"
 )
 
 const alpha = 3
@@ -167,7 +166,7 @@ func (kademlia *Kademlia) LookupData(hash []byte) (data []byte) {
 	dataHash := hex.EncodeToString(hashData(hash))
 	dataKey := NewKademliaID(dataHash)
 	shortList := kademlia.LookupContact(dataKey, kademlia.RoutingTable.me)
-	time.Sleep(1 * time.Second)
+	// time.Sleep(1 * time.Second) <--- ???????
 	for _, contact := range shortList.Contacts {
 		if contact.ID.Equals(kademlia.RoutingTable.me.ID) {
 			result := kademlia.GetData(dataHash)
