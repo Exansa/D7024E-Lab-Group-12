@@ -30,7 +30,7 @@ func TestNetworkPingProcess(t *testing.T) {
 	// Wait for the message to be handled
 	time.Sleep(100 * time.Millisecond)
 
-	res := <-sender.Network.msgChan
+	res := <-sender.Network.msgBuffer
 
 	// Check that the message was handled
 	if res.Type != PONG {

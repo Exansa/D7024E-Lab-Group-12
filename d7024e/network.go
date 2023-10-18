@@ -10,7 +10,7 @@ import (
 
 type Network struct {
 	Kademlia     *Kademlia
-	msgChan      chan RPC
+	msgBuffer    chan RPC
 	dataChan     chan []byte
 	lookupBuffer LookupBuffer
 }
@@ -18,7 +18,7 @@ type Network struct {
 func NewNetwork(kademlia *Kademlia) *Network {
 	network := Network{}
 	network.Kademlia = kademlia
-	network.msgChan = make(chan RPC)
+	network.msgBuffer = make(chan RPC, 100)
 	network.dataChan = make(chan []byte)
 	return &network
 }
@@ -61,7 +61,7 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case PONG:
 		//TODO:
-		network.msgChan <- *msg
+		network.msgBuffer <- *msg
 
 	case STORE:
 		// store data using kademlia func store
@@ -69,7 +69,7 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 		network.SendStoredMessage(&msg.Sender)
 
 	case STORED:
-		network.msgChan <- *msg
+		network.msgBuffer <- *msg
 
 	case FIND_NODE:
 		// send closest nodes using kademlia func lookupcontact
@@ -87,7 +87,7 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case FOUND_NODE:
 		//TODO:
-		network.msgChan <- *msg
+		network.msgBuffer <- *msg
 
 	case FIND_VALUE:
 		// based on hash, find data using kademlia func lookupdata
@@ -98,11 +98,11 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 
 	case FOUND_VALUE:
 		//TODO:
-		network.msgChan <- *msg
+		network.msgBuffer <- *msg
 		network.dataChan <- msg.Data.STORE
 
 	case ERR:
-		network.msgChan <- *msg
+		network.msgBuffer <- *msg
 		fmt.Println("Error:", msg.Data.ERR)
 	case GET:
 		data := network.Kademlia.GetData(msg.Data.HASH)
@@ -114,14 +114,35 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 	}
 }
 
+func (network *Network) awaitAndValidate(mt msgType, sender *KademliaID, timeout int) (RPC, error) {
+	for {
+		select {
+		case res := <-network.msgBuffer:
+			if (res.Type != mt && res.Type != ERR) || !res.Sender.ID.Equals(sender) {
+				fmt.Printf("Unexpected response from %s, requeuing \n", res.Sender.Address)
+				network.msgBuffer <- res
+			} else {
+				return res, nil
+			}
+		case <-time.After(time.Duration(timeout) * time.Second):
+			return RPC{}, fmt.Errorf("timed out waiting for response from %s", sender)
+		}
+	}
+}
+
 func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCandidates, error) {
 	network.SendFindContactMessage(target, sender)
-	res := <-network.msgChan
+	res, err := network.awaitAndValidate(FOUND_NODE, sender.ID, 5)
+
+	if err != nil {
+		return ContactCandidates{}, err
+	}
 
 	if res.Type == ERR {
 		return ContactCandidates{}, fmt.Errorf("findNode failed: %s", res.Data.ERR)
 	}
 
+	//TODO: Dead statement
 	if res.Type != FOUND_NODE || !res.Sender.ID.Equals(sender.ID) {
 		return ContactCandidates{}, fmt.Errorf("findNode failed")
 	}
@@ -133,8 +154,13 @@ func (network *Network) storeAtTarget(data []byte, target *Contact) error {
 	fmt.Print("Storing at target\n")
 	hash := hex.EncodeToString(hashData(data))
 	network.SendStoreMessage(data, hash, target)
-	res := <-network.msgChan
+	res, err := network.awaitAndValidate(STORED, target.ID, 5)
 
+	if err != nil {
+		return err
+	}
+
+	//TODO: Dead statement
 	if res.Type != STORED || !res.Sender.ID.Equals(target.ID) {
 		return fmt.Errorf("storeValue failed")
 	}
@@ -145,8 +171,13 @@ func (network *Network) storeAtTarget(data []byte, target *Contact) error {
 func (network *Network) getAtTarget(hash *KademliaID, target *Contact) ([]byte, error) {
 	fmt.Print("Getting at target", target.Address, "\n")
 	network.SendGetMessage(hash, target)
-	res := <-network.msgChan
+	res, err := network.awaitAndValidate(FOUND_VALUE, target.ID, 5)
 
+	if err != nil {
+		return nil, err
+	}
+
+	//TODO: Dead statement
 	if res.Type != FOUND_VALUE || !res.Sender.ID.Equals(target.ID) {
 		return nil, fmt.Errorf("getValue failed")
 	}
@@ -163,11 +194,12 @@ func (network *Network) ping(timeout int, contact *Contact) error {
 		fmt.Printf("Sent ping to %s\n", contact.Address)
 
 		select {
-		case res := <-network.msgChan:
+		case res := <-network.msgBuffer:
 			if res.Type == PONG && res.Sender.ID.Equals(contact.ID) {
 				return nil
 			} else {
-				fmt.Printf("Ping failed!\n")
+				fmt.Printf("Ping failed due to raise cond!\n")
+				network.msgBuffer <- res
 				continue
 			}
 		case <-time.After(1 * time.Second):
