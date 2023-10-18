@@ -115,11 +115,12 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 }
 
 func (network *Network) awaitAndValidate(mt msgType, sender *KademliaID, timeout int) (RPC, error) {
-	for {
+	for i := 0; i < timeout*100; i++ {
 		select {
 		case res := <-network.msgBuffer:
 			if (res.Type != mt && res.Type != ERR) || !res.Sender.ID.Equals(sender) {
 				fmt.Printf("Unexpected response from %s, requeuing \n", res.Sender.Address)
+				fmt.Printf("Expected: %s, got: %s\n", mt, res.Type)
 				network.msgBuffer <- res
 			} else {
 				return res, nil
@@ -128,6 +129,8 @@ func (network *Network) awaitAndValidate(mt msgType, sender *KademliaID, timeout
 			return RPC{}, fmt.Errorf("timed out waiting for response from %s", sender)
 		}
 	}
+
+	return RPC{}, fmt.Errorf("too many tries waiting on response from %s", sender)
 }
 
 func (network *Network) findNode(target *KademliaID, sender *Contact) (ContactCandidates, error) {

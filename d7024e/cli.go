@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"strings"
 )
@@ -62,9 +63,17 @@ func execute(inp []string, exec func([]string, *Kademlia), inpLen int, corrStr s
 }
 
 func ping(input []string, kademlia *Kademlia) {
+	// Check if the input is a valid address
+	address := input[1]
+	_, err := net.ResolveIPAddr("udp", address)
+	if err != nil {
+		fmt.Printf("Invalid address: %s\n", address)
+		return
+	}
+
 	newID := NewKademliaID(bootstrapIDString)
 	contactInfo := NewContact(newID, input[1])
-	err := kademlia.Network.ping(5, &contactInfo)
+	err = kademlia.Network.ping(5, &contactInfo)
 	if err != nil {
 		fmt.Println("The ping was not successful. \n", err)
 	} else {
