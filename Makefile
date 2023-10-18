@@ -19,3 +19,7 @@ reload:
 start:
 	make build
 	make run
+
+test:
+	$(MAKE) -C d7024e test
+	
