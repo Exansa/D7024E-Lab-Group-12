@@ -33,7 +33,7 @@ func GetSwarmIP() string {
 	}
 
 	for _, addr := range addrs {
-		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.String()[:3] == "10." {
 			if ipnet.IP.To4() != nil {
 				return ipnet.IP.String()
 			}

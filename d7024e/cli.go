@@ -87,9 +87,9 @@ func put(input []string, kademlia *Kademlia) {
 
 func get(input []string, kademlia *Kademlia) {
 	fmt.Printf("Your file was fetched succesfully! \n")
-	err := kademlia.LookupData([]byte(input[1]))
-	if err != nil {
-		fmt.Println("The ping was not successful. \n", err)
+	res := kademlia.LookupData([]byte(input[1]))
+	if res != nil {
+		fmt.Println("The ping was not successful. \n", string(res))
 	}
 	//get file from hash here
 	//return file to user here
