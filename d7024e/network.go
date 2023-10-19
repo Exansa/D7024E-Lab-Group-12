@@ -58,7 +58,6 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 		network.SendPongMessage(&msg.Sender)
 
 	case PONG:
-		//TODO:
 		network.msgBuffer <- *msg
 
 	case STORE:
@@ -84,7 +83,6 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 		network.lookupBuffer.Remove(*msg)
 
 	case FOUND_NODE:
-		//TODO:
 		network.msgBuffer <- *msg
 
 	case FIND_VALUE:
@@ -95,7 +93,6 @@ func (network *Network) handleRequest(msg *RPC) { // Server side
 		}
 
 	case FOUND_VALUE:
-		//TODO:
 		network.msgBuffer <- *msg
 		network.dataChan <- msg.Data.STORE
 

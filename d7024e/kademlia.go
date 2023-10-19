@@ -74,10 +74,11 @@ func (kademlia *Kademlia) initNode() error {
 	go kademlia.Network.Listen()
 
 	// Try manually pinging the bootstrap node
-	err := kademlia.Network.ping(300, &bootstrapContact) //TODO: Add timeout
+	err := kademlia.Network.ping(300, &bootstrapContact)
 	if err == nil {
 		// Bootstrap node is alive and has added you as a contact, init connection
 		fmt.Println("Bootstrap node is alive, initializing connection")
+		kademlia.LookupContact(kademlia.ID, kademlia.RoutingTable.me)
 		return nil
 	} else {
 		// Invalid/No response from bootstrap node, set bootstrap node to self
