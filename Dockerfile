@@ -11,9 +11,7 @@ FROM golang:latest
 # "kadlab", which you do by using the following command:
 #
 # $ docker build . -t kadlab
-# syntax=docker/dockerfile:1
-#FROM golang:1.16-alpine AS build
-#FROM larjim/kademlialab
+
 RUN mkdir /kad
 ADD . /kad
 WORKDIR /kad
@@ -27,5 +25,4 @@ RUN go build -o d7024e/main.go
 RUN adduser --disabled-password --gecos '' kadusr
 USER kadusr
 
-#ENTRYPOINT [ "/bin/bash" ]
 CMD [ "go", "run", "main" ]
