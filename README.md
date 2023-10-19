@@ -2,6 +2,6 @@
 
 ## UML Diagram
 
-![UML Diagram](resource/uml250923.svg)
+![UML Diagram](resource/d7024uml.svg)
 
-(Last updated 2021-09-25 16:00)
+(Last updated 2023-10-19)
