@@ -7,28 +7,8 @@
 
 version: "3"
 services:
-  # kademliaBootNodes:
-  #   image: kadlab:latest # Make sure your Docker image has this name.
-  #   ports:
-  #     - 8000:8000
-  #   stdin_open: true
-  #   tty: true
-  #   deploy:
-  #     mode: replicated
-  #     replicas: 1
-  #     restart_policy:
-  #       condition: on-failure
-  #       delay: 5s
-  #       max_attempts: 3
-  #       window: 10s
-  #   networks:
-  #     kademlia_network:
-  #       ipv4_address: 10.0.8.3
-
   kademliaNodes:
     image: kadlab:latest # Make sure your Docker image has this name.
-    # ports:
-    #   - 7000:7000
     stdin_open: true
     tty: true
     deploy:
