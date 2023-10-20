@@ -1,4 +1,4 @@
-package main
+package d7024e
 
 import (
 	"bufio"
@@ -103,5 +103,9 @@ func get(input []string, kademlia *Kademlia) {
 
 func exit(input []string, kademlia *Kademlia) {
 	fmt.Printf("Bye, bye little node! \n")
-	os.Exit(0)
+	if input[0] == "test" {
+
+	} else {
+		os.Exit(0)
+	}
 }

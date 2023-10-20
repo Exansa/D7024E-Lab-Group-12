@@ -1,4 +1,4 @@
-package main
+package d7024e
 
 import (
 	"encoding/hex"
@@ -52,13 +52,8 @@ func (kademlia *Kademlia) isInitialized() bool {
 	return !kademlia.ID.Equals(uninitID)
 }
 
-func (kademlia *Kademlia) isBootstrapNode() bool {
-	bootstrapID := NewKademliaID(bootstrapIDString)
-	return kademlia.ID.Equals(bootstrapID)
-}
-
 func (kademlia *Kademlia) initNode() error {
-	bootstrapAddress := "10.0.8.3:8000"
+	bootstrapAddress := "127.0.0.1:1337"
 	bootstrapID := NewKademliaID(bootstrapIDString)
 
 	if kademlia.ADDRESS == bootstrapAddress {

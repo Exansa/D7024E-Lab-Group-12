@@ -1,4 +1,4 @@
-package main
+package d7024e
 
 import (
 	"encoding/json"
@@ -6,10 +6,11 @@ import (
 )
 
 type RPC struct {
-	Sender   Contact `json:"sender"`   // sender Contact
-	Receiver Contact `json:"receiver"` // receiver Contact
-	Type     msgType `json:"msgType"`  // message type
-	Data     msgData `json:"data"`     // message data
+	Sender      Contact `json:"sender"`      // sender Contact
+	Receiver    Contact `json:"receiver"`    // receiver Contact
+	Type        msgType `json:"msgType"`     // message type
+	Data        msgData `json:"data"`        // message data
+	TimeCreated int64   `json:"timeCreated"` // time created
 }
 
 type msgData struct {

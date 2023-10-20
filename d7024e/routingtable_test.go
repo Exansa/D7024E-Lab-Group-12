@@ -1,4 +1,4 @@
-package main
+package d7024e
 
 import (
 	"fmt"
@@ -20,4 +20,5 @@ func TestRoutingTable(t *testing.T) {
 	for i := range contacts {
 		fmt.Println(contacts[i].String())
 	}
+	rt.getBucketIndex(NewKademliaID("3111111400000000000000000000000000000000"))
 }

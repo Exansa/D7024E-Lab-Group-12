@@ -1,4 +1,4 @@
-package main
+package d7024e
 
 import (
 	"fmt"
@@ -58,15 +58,41 @@ func TestNetworkPingFunction(t *testing.T) {
 	sender.Network.ping(5, &receiverContact) // <- Fails or gets stuck if the message is not handled
 }
 
-// func TestLookupBuffer(t *testing.T) {
-// 	fmt.Println("TestLookupBuffer")
-// 	// Create a buffer and fill it with 10 rpcs
-// 	buffer := LookupBuffer{}
-// 	for i := 0; i < 10; i++ {
-// 		rpc := RPC{}
-// 		rpc.Sender = NewContact(NewRandomKademliaID(), "")
-// 		rpc.Type = FIND_NODE
+func TestLookupBuffer(t *testing.T) {
+	fmt.Println("TestLookupBuffer")
+	// Create a buffer and fill it with 10 rpcs
+	buffer := LookupBuffer{}
+	for i := 0; i < 10; i++ {
+		rpc := RPC{}
+		rpc.Sender = NewContact(NewRandomKademliaID(), "")
+		rpc.Type = FIND_NODE
 
-// 		buffer.Append(NewRandomKademliaID())
-// 	}
-// }
+		buffer.Append(rpc)
+	}
+	rpc := RPC{}
+	rpc.Sender = NewContact(NewRandomKademliaID(), "")
+	rpc.Type = FIND_NODE
+
+	buffer.Append(rpc)
+	buffer.Has(rpc)
+	buffer.Remove(rpc)
+	buffer.Len()
+
+}
+func TestNetworkFindNode(t *testing.T) {
+	receiver := NewKademlia("127.0.0.1:4000")
+	receiver.setNodeID(NewRandomKademliaID()) // Simple way to init node
+	receiverContact := NewContact(receiver.ID, receiver.ADDRESS)
+
+	sender := NewKademlia("127.0.0.1:4001")
+	sender.setNodeID(NewRandomKademliaID())
+	senderContact := NewContact(sender.ID, sender.ADDRESS)
+
+	go receiver.Network.Listen()
+	go sender.Network.Listen()
+	time.Sleep(100 * time.Millisecond)
+
+	// Send a message to the network
+	sender.Network.findNode(receiverContact.ID, &senderContact)
+
+}

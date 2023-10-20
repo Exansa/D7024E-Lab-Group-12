@@ -1,6 +1,7 @@
-package main
+package d7024e
 
 import (
+	"encoding/hex"
 	"fmt"
 	"testing"
 	"time"
@@ -192,7 +193,7 @@ func TestStoreValue(t *testing.T) {
 
 func TestFindValue(t *testing.T) {
 	time.Sleep(1000 * time.Millisecond)
-	fmt.Println("TestStore")
+	fmt.Println("TestFind value")
 	rootNode := NewKademlia("127.0.0.1:1337")
 	rootNode.initNode()
 	//wait for root node to be initialized
@@ -234,12 +235,10 @@ func TestFindValue(t *testing.T) {
 	err := child3.Store([]byte("hogaboga"))
 
 	time.Sleep(1000 * time.Millisecond)
-	isBoot := rootNode.isBootstrapNode()
 	isInit := rootNode.isInitialized()
-	if !isBoot || !isInit {
+	if !isInit {
 		t.Fail()
 	}
-
 	if err != nil {
 		t.Fail()
 	}
@@ -250,15 +249,40 @@ func TestFindValue(t *testing.T) {
 	} else {
 		t.Fail()
 	}
+	dataHash := hex.EncodeToString(hashData(hashData([]byte("hogaboga"))))
+	dataKey := NewKademliaID(dataHash)
+	child4.Network.storeAtTarget([]byte("hogaboga"), rootNode.RoutingTable.me)
+	time.Sleep(100 * time.Millisecond)
+	child8.Network.getAtTarget(dataKey, rootNode.RoutingTable.me)
 
+	res2, err := child1.Network.findNode(child2.ID, rootNode.RoutingTable.me)
+	if err != nil {
+		t.Fail()
+	} else if res2.Has(child2.ID) {
+		fmt.Println("Found target contact")
+	} else {
+		t.Fail()
+	}
+	inputGet := []string{"get", "hogaboga"}
+	get(inputGet, child3)
+	inputPut := []string{"put", "hogaboga2"}
+	put(inputPut, child1)
 }
 
-/*
 func TestGetLocalData(t *testing.T) {
 	dataHash := hex.EncodeToString(hashData([]byte("test")))
 	kademlia := NewKademlia("127.0.0.1:1337")
-	kademlia.initNode()
+	kademlia.setNodeID(NewRandomKademliaID())
 	kademlia.StoreLocally([]byte("test"), dataHash)
 	testValue := kademlia.GetData(hex.EncodeToString(hashData([]byte("test"))))
 	fmt.Print("Test value: ", string(testValue), "\n")
-}*/
+	result := kademlia.GetData(hex.EncodeToString(hashData([]byte("test"))))
+	if string(result) != string([]byte("test")) {
+		t.Fail()
+	}
+}
+
+func TestSetId(t *testing.T) {
+	kademlia := NewKademlia("127.0.0.1:1447")
+	kademlia.setNodeID(NewRandomKademliaID())
+}
